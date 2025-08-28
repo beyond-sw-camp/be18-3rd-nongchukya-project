@@ -4,8 +4,7 @@ spring:
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
     url: jdbc:mariadb://localhost:3306/jwt
-    username: beyond
-    password: beyond
+  
   jackson:
     property-naming-strategy: SNAKE_CASE
 mybatis:
@@ -16,7 +15,7 @@ mybatis:
     jdbc-type-for-null: NULL
     map-underscore-to-camel-case: true
 jwt:
-  secret: 64461f01e1af406da538b9c48d801ce59142452199ff112fb5404c8e7e98e3ff
+
   access-exp-min: 15
   refresh-exp-day: 14
 
