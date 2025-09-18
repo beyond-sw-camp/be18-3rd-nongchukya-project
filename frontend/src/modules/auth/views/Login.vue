@@ -11,10 +11,6 @@
         <h2 class="title">Log In</h2>
 
         <LoginForm />
-
-        <p class="signup-text">
-          Don’t have an account? <a href="#">Sign up</a>
-        </p>
       </div>
     </div>
   </div>
@@ -25,7 +21,6 @@ import LoginForm from '../components/LoginForm.vue';
 </script>
 
 <style scoped>
-/* 전체 배경 */
 .login-page {
   min-height: 100vh;
   display: flex;
@@ -35,7 +30,6 @@ import LoginForm from '../components/LoginForm.vue';
   font-family: 'Inter', sans-serif;
 }
 
-/* 카드 박스 */
 .login-box {
   display: flex;
   background: white;
@@ -46,7 +40,6 @@ import LoginForm from '../components/LoginForm.vue';
   max-width: 95%;
 }
 
-/* 왼쪽 이미지 */
 .login-left {
   flex: 1;
   display: flex;
@@ -59,7 +52,6 @@ import LoginForm from '../components/LoginForm.vue';
   object-fit: cover;
 }
 
-/* 오른쪽 로그인 */
 .login-right {
   flex: 1;
   padding: 3rem 2rem;
@@ -70,7 +62,6 @@ import LoginForm from '../components/LoginForm.vue';
   text-align: center;
 }
 
-/* 제목 */
 .title {
   position: relative;
   font-size: 2rem;
@@ -80,7 +71,6 @@ import LoginForm from '../components/LoginForm.vue';
   color: #222;
 }
 
-/* L 뒤 원 */
 .title::before {
   content: '';
   position: absolute;
@@ -92,18 +82,6 @@ import LoginForm from '../components/LoginForm.vue';
   background: url('@/assets/LoginCircle.png') no-repeat center/contain;
   opacity: 0.9;
 
-  /* 핵심: 합성 모드 */
-  mix-blend-mode: multiply; /* 필요에 따라 screen / overlay 도 테스트 가능 */
-}
-
-/* 회원가입 텍스트 */
-.signup-text {
-  font-size: 0.9rem;
-  color: #444;
-}
-.signup-text a {
-  color: #ff6600;
-  font-weight: 600;
-  text-decoration: none;
+  mix-blend-mode: multiply; 
 }
 </style>
