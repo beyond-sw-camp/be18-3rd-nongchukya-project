@@ -1,9 +1,10 @@
-import Login from '@/modules/auth/views/Login.vue'
 import { createRouter, createWebHistory } from 'vue-router'
+import Login from '@/modules/auth/views/Login.vue'
+import Signup from '@/modules/auth/views/Signup.vue'   // 새 회원가입 컴포넌트
 
 const routes = [
-  {path: '/', redirect: '/login' },
-  { path: '/login', component: Login }
+  { path: '/Login', name: 'Login', component: Login },
+  { path: '/Signup', name: 'Signup', component: Signup }, // 회원가입 경로 추가
 ]
 
 const router = createRouter({

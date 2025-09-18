@@ -23,7 +23,7 @@
     </div>
 
     <p class="signup-text">
-          Don’t have an account? <a href="#">Sign up</a>
+          Don’t have an account? <router-link to="/Signup">Sign up</router-link>
     </p>
   </form>
 </template>
@@ -150,7 +150,6 @@ button[type="submit"]:hover {
   transition: stroke-dashoffset 0.7s ease, stroke-width 0.3s ease;
 }
 
-/* hover 시 */
 .fancy-btn:hover .border {
   stroke-dashoffset: 0;     
   stroke-width: 2;         
