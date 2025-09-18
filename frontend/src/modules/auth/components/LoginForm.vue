@@ -2,9 +2,16 @@
   <form>
     <input type="text" placeholder="아이디" />
     <input type="password" placeholder="비밀번호" />
+    <div class="forgot-password-container">
+      <a href="#" class="forgot-password">Forgot password?</a>
+    </div>
     <button type="submit">로그인</button>
 
-    <p class="or-text">Or login with</p>
+    <div class="or-divider">
+      <span class="line"></span>
+      <span class="or-text">Or login with</span>
+      <span class="line"></span>
+    </div>
 
     <div class="social-login">
       <button type="button" class="social-btn fancy-btn">
@@ -14,6 +21,10 @@
         <img src="@/assets/KakaoIcon.png" alt="Kakao" class="kakao-icon" />
       </button>
     </div>
+
+    <p class="signup-text">
+          Don’t have an account? <a href="#">Sign up</a>
+    </p>
   </form>
 </template>
 
@@ -21,6 +32,47 @@
 </script>
 
 <style scoped>
+.forgot-password-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -0.8rem;
+  margin-bottom: 1rem;
+}
+.forgot-password {
+  font-size: 0.9rem;
+  color: #ff6600;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.forgot-password:hover {
+  color: #FFA047;
+  text-decoration: underline;
+}
+
+.signup-text a:hover {
+  color: #FFA047;
+  text-decoration: underline;
+}
+
+
+.or-divider {
+  display: flex;
+  align-items: center;
+  margin: 1rem 0 0.5rem 0;
+}
+.or-divider .line {
+  flex: 1;
+  height: 1px;
+  background: #e0e0e0;
+  margin: 5px 10px;
+  position: relative;
+  top: 0.5em;
+}
+.or-divider .or-text {
+  color: #888;
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
 form {
   display: flex;
   flex-direction: column;
@@ -102,5 +154,14 @@ button[type="submit"]:hover {
 .fancy-btn:hover .border {
   stroke-dashoffset: 0;     
   stroke-width: 2;         
+}
+
+.signup-text {
+  font-size: 0.9rem;
+  color: #444;
+}
+.signup-text a {
+  color: #ff6600;
+  font-weight: 600;
 }
 </style>
