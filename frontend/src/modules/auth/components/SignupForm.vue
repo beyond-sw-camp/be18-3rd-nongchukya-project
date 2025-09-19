@@ -198,7 +198,7 @@ const onSubmit = () => {
   display: flex;
   flex-direction: column;
   width: 80%;
-  max-width: 350px;
+  max-width: 600px;
   margin: 0 auto;
 }
 
@@ -245,14 +245,15 @@ input {
 }
 
 .submit-btn {
-  width: 100%;
+  align-self: center;
+  width: 30%;
   height: 44px;
   margin-top: 1rem;
   color: #ffffff;
   background-color: #1D61E7;
-  border-radius: 16px;
+  border-radius: 10px;
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 400;
 }
 .submit-btn:hover {
   background-color: #5d90f5;

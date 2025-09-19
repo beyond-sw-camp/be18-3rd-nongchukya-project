@@ -2,9 +2,13 @@
   <form>
     <input type="text" placeholder="아이디" />
     <input type="password" placeholder="비밀번호" />
+    
     <div class="forgot-password-container">
-      <a href="#" class="forgot-password">Forgot password?</a>
+      <router-link to="/forgot-password" class="forgot-password">
+        Forgot password?
+      </router-link>
     </div>
+
     <button type="submit">로그인</button>
 
     <div class="or-divider">
