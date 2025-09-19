@@ -4,6 +4,7 @@ import Signup from '@/modules/auth/views/Signup.vue'
 import ForgotPassword from '@/modules/auth/views/ForgotPassword.vue'
 import ResetPassword from '@/modules/auth/views/ResetPassword.vue'
 import Home from '@/views/Home.vue'  
+import HelloTest from '@/views/HelloTest.vue'
 
 const routes = [
   { path: '/login', name: 'Login', component: Login, meta: { hideHeader: true } },
@@ -11,6 +12,7 @@ const routes = [
   { path: '/forgot-password', name: 'ForgotPassword', component: ForgotPassword, meta: { hideHeader: true } },
   { path: '/reset-password', name: 'ResetPassword', component: ResetPassword, meta: { hideHeader: true } },
   { path: '/', name: 'Home', component: Home }, 
+  {path: "/test", component: HelloTest}
 ]
 
 const router = createRouter({

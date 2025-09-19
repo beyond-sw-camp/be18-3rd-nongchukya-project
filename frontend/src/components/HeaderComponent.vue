@@ -64,9 +64,7 @@
 </template>
 
 <script>
-import axios from "axios";
-
-const API = "http://localhost:8080";
+import api from "@/api/axios"
 
 export default {
   data() {
@@ -74,48 +72,73 @@ export default {
       isLogin: false,
       badgeCount: 0,
       es: null,
-    };
+    }
   },
   created() {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("accessToken")
     if (token) {
-      this.isLogin = true;
-      this.bootstrapBadge();
-      this.connectSSE();
+      this.isLogin = true
+      this.bootstrapBadge()
+      this.connectSSE()
     }
   },
   methods: {
     async bootstrapBadge() {
       try {
-        const { data } = await axios.get(`${API}/api/v1/notifications/unread-count`);
-        this.badgeCount = data?.count ?? 0;
-      } catch { /* noop */ }
+        const { data } = await api.get("/api/v1/notifications/unread-count")
+        this.badgeCount = data?.count ?? 0
+      } catch {
+        /* 에러 무시 */
+      }
     },
     connectSSE() {
-      const token = localStorage.getItem("token");
-      this.es = new EventSource(`${API}/api/v1/sse/notifications?token=${encodeURIComponent(token || "")}`);
+      const token = localStorage.getItem("accessToken")
+      this.es = new EventSource(
+        `http://localhost:8080/api/v1/sse/notifications?token=${encodeURIComponent(
+          token || ""
+        )}`
+      )
       this.es.addEventListener("match-confirmed", (e) => {
-        this.badgeCount += 1;
-        window.dispatchEvent(new CustomEvent("notifications:new", { detail: JSON.parse(e.data) }));
-      });
+        this.badgeCount += 1
+        window.dispatchEvent(
+          new CustomEvent("notifications:new", { detail: JSON.parse(e.data) })
+        )
+      })
       this.es.addEventListener("match-cancelled", (e) => {
-        this.badgeCount += 1;
-        window.dispatchEvent(new CustomEvent("notifications:new", { detail: JSON.parse(e.data) }));
-      });
-      window.addEventListener("notifications:reset-badge", this.resetBadge);
+        this.badgeCount += 1
+        window.dispatchEvent(
+          new CustomEvent("notifications:new", { detail: JSON.parse(e.data) })
+        )
+      })
+      window.addEventListener("notifications:reset-badge", this.resetBadge)
     },
-    resetBadge() { this.badgeCount = 0; },
+    resetBadge() {
+      this.badgeCount = 0
+    },
     beforeUnmount() {
-      if (this.es) this.es.close();
-      window.removeEventListener("notifications:reset-badge", this.resetBadge);
+      if (this.es) this.es.close()
+      window.removeEventListener("notifications:reset-badge", this.resetBadge)
     },
-    doLogout() {
-      localStorage.clear();
-      window.location.reload();
-    },
+    async doLogout() {
+  try {
+    await api.post("/api/v1/auth/logout") // 쿠키도 서버에서 만료됨
+
+    localStorage.removeItem("accessToken") // accessToken만 제거
+
+    this.isLogin = false
+    this.badgeCount = 0
+
+    alert("로그아웃 되었습니다.")
+    this.$router.push("/login")
+  } catch (err) {
+    console.error("❌ 로그아웃 실패:", err.response?.data || err.message)
+    alert("로그아웃 실패: " + (err.response?.data?.message || err.message))
+  }
+},
   },
-};
+}
 </script>
+
 
 <style scoped>
 /* 레이아웃 */

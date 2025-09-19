@@ -117,6 +117,7 @@
 <script setup>
 import { ref, watch, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import api from '@/api/axios'
 
 const router = useRouter()
 
@@ -130,7 +131,6 @@ const phone = ref('')
 const verificationCode = ref('')
 const verificationSent = ref(false)
 
-// 아이디 중복 확인 (testuser만 막음)
 const isUsernameAvailable = ref(null)
 let debounceTimer = null
 watch(username, (val) => {
@@ -141,7 +141,7 @@ watch(username, (val) => {
   }
   debounceTimer = setTimeout(() => {
     isUsernameAvailable.value = val !== 'testuser'
-  }, 1500) 
+  }, 1500)
 })
 
 const passwordMismatch = computed(() => {
@@ -165,7 +165,7 @@ const checkVerificationCode = () => {
   }
 }
 
-const onSubmit = () => {
+const onSubmit = async () => {
   if (passwordMismatch.value) {
     alert('비밀번호가 일치하지 않습니다.')
     return
@@ -175,10 +175,32 @@ const onSubmit = () => {
     return
   }
 
-  alert('회원가입이 완료되었습니다. 로그인 페이지로 이동합니다.')
-  router.push('/login')
+  try {
+    const res = await api.post("/api/v1/auth/signup", {
+      loginId: username.value,
+      email: email.value,
+      password: password.value,
+      nickname: username.value,   // User 엔티티에 nickname 필드 있어서 넣음
+      name: name.value,
+      age: 20,                    // birthdate → 나이 변환이 필요하다면 여기에서
+      gender: "M",                // 임시 값 (DTO 구조에 맞게 수정 필요)
+      address: "서울시",           // 필수라면 임시 값
+      phoneNumber: phone.value,
+      dmOption: true,             // 수신 동의 같은 거라면 기본 true
+      status: "ACTIVE",           // 기본 계정 상태
+      profileImage: null,         // 프로필 이미지 없음
+      role: "USER"
+    })
+    console.log("✅ 회원가입 성공:", res.data)
+    alert("회원가입이 완료되었습니다. 로그인 페이지로 이동합니다.")
+    router.push('/login')
+  } catch (err) {
+    console.error("❌ 회원가입 실패:", err.response?.data || err.message)
+    alert("회원가입 실패: " + (err.response?.data?.message || err.message))
+  }
 }
 </script>
+
 
 <style scoped>
 
