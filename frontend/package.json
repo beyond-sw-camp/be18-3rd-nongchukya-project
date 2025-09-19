@@ -17,6 +17,7 @@
     "@mdi/font": "^7.4.47",
     "axios": "^1.12.2",
     "jwt-decode": "^4.0.0",
+    "bootstrap": "^5.3.8",
     "pinia": "^3.0.3",
     "sockjs-client": "^1.6.1",
     "vue": "^3.5.18",

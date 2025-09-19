@@ -5,6 +5,8 @@ import ForgotPassword from '@/modules/auth/views/ForgotPassword.vue'
 import ResetPassword from '@/modules/auth/views/ResetPassword.vue'
 import Home from '@/views/Home.vue'  
 import HelloTest from '@/views/HelloTest.vue'
+import MatchApplication from '@/modules/match/views/MatchApplications.vue'
+import MatchApplications from '@/modules/match/views/MatchApplications.vue'
 
 const routes = [
   { path: '/login', name: 'Login', component: Login, meta: { hideHeader: true } },
@@ -12,7 +14,9 @@ const routes = [
   { path: '/forgot-password', name: 'ForgotPassword', component: ForgotPassword, meta: { hideHeader: true } },
   { path: '/reset-password', name: 'ResetPassword', component: ResetPassword, meta: { hideHeader: true } },
   { path: '/', name: 'Home', component: Home }, 
-  {path: "/test", component: HelloTest}
+  {path: "/test", component: HelloTest},
+  { path: '/matchApplication/add', name: 'matchApplication/add', component: MatchApplication },
+  { path: '/matchApplications', name: 'matchApplications', component: MatchApplications },
 ]
 
 const router = createRouter({
