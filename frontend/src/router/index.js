@@ -7,6 +7,7 @@ import ResetPassword from '@/modules/auth/views/ResetPassword.vue'
 import PostList from '@/modules/community/views/PostList.vue'
 
 import Home from '@/views/Home.vue'  
+import HelloTest from '@/views/HelloTest.vue'
 
 const routes = [
   // Auth
@@ -27,6 +28,7 @@ const routes = [
 
   // Home
   { path: '/', name: 'Home', component: Home }, 
+  {path: "/test", component: HelloTest}
 ]
 
 const router = createRouter({

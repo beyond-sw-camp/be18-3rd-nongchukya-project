@@ -1,8 +1,8 @@
 <template>
-  <form>
-    <input type="text" placeholder="아이디" />
-    <input type="password" placeholder="비밀번호" />
-    
+  <form @submit.prevent="onSubmit">
+    <input type="text" placeholder="아이디" v-model="loginId" />
+    <input type="password" placeholder="비밀번호" v-model="password" />
+
     <div class="forgot-password-container">
       <router-link to="/forgot-password" class="forgot-password">
         Forgot password?
@@ -27,13 +27,44 @@
     </div>
 
     <p class="signup-text">
-          Don’t have an account? <router-link to="/Signup">Sign up</router-link>
+      Don’t have an account? <router-link to="/signup">Sign up</router-link>
     </p>
   </form>
 </template>
 
 <script setup>
+import { ref } from "vue"
+import { useRouter } from "vue-router"
+import api from '@/api/axios'
+
+const router = useRouter()
+
+// 입력값 바인딩
+const loginId = ref("")
+const password = ref("")
+
+// 로그인 API
+const onSubmit = async () => {
+  try {
+    const res = await api.post("/api/v1/auth/login", {
+      loginId: loginId.value,
+      password: password.value
+    })
+
+    console.log("✅ 로그인 성공:", res.data)
+
+    // ⭕ accessToken만 저장
+    localStorage.setItem("accessToken", res.data.accessToken)
+
+    alert("로그인 성공!")
+    router.push("/") 
+  } catch (err) {
+    console.error("❌ 로그인 실패:", err.response?.data || err.message)
+    alert("로그인 실패: " + (err.response?.data?.message || err.message))
+  }
+}
 </script>
+
 
 <style scoped>
 .forgot-password-container {
