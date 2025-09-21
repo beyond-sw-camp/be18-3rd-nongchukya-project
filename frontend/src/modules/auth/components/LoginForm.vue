@@ -36,6 +36,8 @@
 import { ref } from "vue"
 import { useRouter } from "vue-router"
 import api from '@/api/axios'
+import { jwtDecode } from 'jwt-decode';
+import { useNotificationStore } from "@/stores/notifications";
 
 const router = useRouter()
 
@@ -52,9 +54,12 @@ const onSubmit = async () => {
     })
 
     console.log("✅ 로그인 성공:", res.data)
+    const nickname = jwtDecode(res.data.accessToken).nick
 
     // ⭕ accessToken만 저장
     localStorage.setItem("accessToken", res.data.accessToken)
+    localStorage.setItem("nickname", nickname);
+    await useNotificationStore().refreshConnectionAfterTokenChange()
 
     alert("로그인 성공!")
     router.push("/") 
