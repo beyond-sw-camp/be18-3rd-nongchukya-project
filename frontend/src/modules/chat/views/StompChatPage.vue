@@ -1,37 +1,53 @@
 <template>
-  <div class="chat-room">
-    <!-- 메시지 -->
-    <div class="chat-box">
-      <div
-        v-for="(m, i) in messages"
-        :key="i"
-        class="msg"
-        :class="{ me: isMe(m), other: !isMe(m) }"
-      >
-        <!-- 상대 아바타(이니셜) -->
-        <div v-if="!isMe(m)" class="avatar">{{ initials(m.senderNickname) }}</div>
+  <div class="chat-layout">
+    <!-- 좌측 참여자 목록 -->
+    <aside class="members">
+      <div class="members-header">참여자</div>
+      <ul class="members-list">
+        <li v-for="nick in members" :key="nick" :class="{ me: nick === senderNickname }">
+          <div class="avatar">{{ initials(nick) }}</div>
+          <div class="nick">
+            {{ nick }}
+            <span v-if="nick === senderNickname" class="me-badge">나</span>
+          </div>
+        </li>
+        <li v-if="members.length === 0" class="empty">참여자 정보가 없습니다.</li>
+      </ul>
+    </aside>
 
-        <div class="msg-body">
-          <div v-if="!isMe(m)" class="name">{{ m.senderNickname }}</div>
-          <div class="bubble">{{ m.message }}</div>
-          <div class="time">{{ formatTime(m.createdAt) }}</div>
+    <!-- 우측 대화 영역 -->
+    <section class="conversation">
+      <div class="chat-box">
+        <div
+          v-for="(m, i) in messages"
+          :key="i"
+          class="msg"
+          :class="{ me: isMe(m), other: !isMe(m) }"
+        >
+          <div v-if="!isMe(m)" class="avatar">{{ initials(m.senderNickname) }}</div>
+
+          <div class="msg-body">
+            <div v-if="!isMe(m)" class="name">{{ m.senderNickname }}</div>
+            <div class="bubble">{{ m.message }}</div>
+            <div class="time">{{ formatTime(m.createdAt) }}</div>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- 입력줄 -->
-    <div class="input-row">
-      <VotePanel :room-id="effectiveRoomId" />
-      <input
-        class="input flex1"
-        v-model="newMessage"
-        placeholder="메시지를 입력하세요"
-        @keyup.enter="sendMessage"
-      />
-      <button class="btn primary" @click="sendMessage">전송</button>
-    </div>
+      <div class="input-row">
+        <VotePanel :room-id="effectiveRoomId" />
+        <input
+          class="input flex1"
+          v-model="newMessage"
+          placeholder="메시지를 입력하세요"
+          @keyup.enter="sendMessage"
+        />
+        <button class="btn primary" @click="sendMessage">전송</button>
+      </div>
+    </section>
   </div>
 </template>
+
 
 <script>
 import SockJS from 'sockjs-client'
@@ -69,6 +85,9 @@ export default {
       `/api/v1/chatrooms/history/${this.effectiveRoomId}`
     )
     this.messages = data.items || []
+    await this.loadMembers().catch(() => {})
+    if(this.members.length === 0) this.buildMembersFromMessages();
+
     this.connectWebsocket()
   },
   beforeRouteLeave(to, from, next) {
@@ -164,6 +183,15 @@ export default {
       const ampm = h >= 12 ? 'PM' : 'AM'; const hh = h % 12 || 12;
       return `${ampm} ${hh}:${m}`;
     },
+    async loadMembers() {
+      const {data} = await api.get(`/api/v1/chatrooms/${this.effectiveRoomId}/users`);
+      const arr = data.items || data.item || data || []
+      this.members = arr.map(m => m.nickname ?? m).filter(Boolean);
+    },
+    buildMembersFromMessages() {
+      const set = new Set(this.messages.map(m => m.senderNickname).filter(Boolean))
+      this.members = Array.from(set)
+    },
   },
 }
 </script>
@@ -244,4 +272,72 @@ export default {
 /* 버튼 */
 .btn { border: 1px solid #e5e7eb; border-radius: 10px; padding: 8px 14px; font-weight: 700; cursor: pointer; }
 .btn.primary { border-color: transparent; background: linear-gradient(180deg,#ffb467,#f59b44); color: #fff; }
+
+/* 전체 2열 레이아웃 */
+.chat-layout{
+  display: grid;
+  grid-template-columns: 240px 1fr; /* 좌측 패널 240px */
+  height: 100%;
+  min-height: 0;
+  background: #fff;
+}
+
+/* 좌측 참여자 패널 */
+.members{
+  border-right: 1px solid #eee;
+  padding: 12px;
+  overflow-y: auto;
+  min-height: 0;
+}
+.members-header{
+  font-weight: 800;
+  margin: 4px 0 10px;
+}
+.members-list{
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 6px;
+}
+.members-list li{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 10px;
+}
+.members-list li.me{
+  background: #fff6ef; /* 내 닉네임 하이라이트 */
+}
+.members-list .nick{
+  font-weight: 600;
+  color: #111827;
+}
+.me-badge{
+  margin-left: 6px;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: #ffd8b0;
+  color: #7a3a00;
+}
+.members-list .empty{
+  color: #9ca3af;
+}
+
+/* 우측 대화 영역 */
+.conversation{
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+/* 반응형: 작은 화면에서는 참여자 패널 숨김 */
+@media (max-width: 860px){
+  .chat-layout{ grid-template-columns: 1fr; }
+  .members{ display: none; }
+}
+
 </style>
