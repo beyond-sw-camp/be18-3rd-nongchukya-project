@@ -22,7 +22,7 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
     // 401 Unauthorized & 재시도 안했을 때만
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (error.response?.status === 403 && !originalRequest._retry) {
       originalRequest._retry = true;
 
       try {
