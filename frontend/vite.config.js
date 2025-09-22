@@ -15,4 +15,8 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     },
   },
+  define: {
+    global: 'window',          // global → window 치환
+    // 'process.env': {}        // 필요 시 활성화
+  }
 })
