@@ -13,6 +13,8 @@ import Home from '@/views/Home.vue'
 import NotificationPage from '@/modules/chat/views/NotificationPage.vue'
 import MyChatPage from '@/modules/chat/views/MyChatPage.vue'
 import FriendsList from '@/modules/friends/views/FriendsList.vue'
+import FriendRequestsList from '@/modules/friends/views/FriendRequestsList.vue'
+import SendFriendRequest from '@/modules/friends/views/SendFriendRequest.vue'
 import Mypage from '@/modules/mypage/views/Mypage.vue'
 const routes = [
   // Auth

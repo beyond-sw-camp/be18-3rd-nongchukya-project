@@ -86,7 +86,7 @@ const friends = computed(() => friendsStore.friend_list);
 // 검색 필터
 const filteredFriends = computed(() => {
     if (!searchQuery.value.trim()) return friends.value;
-        return friend.value.filter(f =>
+        return friends.value.filter(f =>
     f.nickname.includes(searchQuery.value.trim())
     );
 });
