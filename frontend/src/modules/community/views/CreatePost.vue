@@ -56,7 +56,7 @@ const newFiles = ref([]);
 
 // 첨부파일 선택
 const handleFilesUpload = (e) => {
-  newFiles.value = Array.from(e.target.files);
+  newFiles.value = [...newFiles.value, ...Array.from(e.target.files)];
 };
 
 // 게시글 작성

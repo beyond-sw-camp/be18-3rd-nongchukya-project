@@ -30,8 +30,7 @@
         <a
           v-for="file in post.attachments"
           :key="file.attachmentId"
-          :href="file.fileUrl"
-          target="_blank"
+          :href="`http://localhost:8080${file.fileUrl}`" target="_blank" rel="noopener"
         >
           📎 {{ file.originalName }}
         </a>
@@ -87,6 +86,8 @@ export default {
         );
         // post.value = res.data.items[0];
         post.value = Array.isArray(res.data.items) ? res.data.items[0] : res.data.items;
+
+        console.log("attachments 확인:", post.value.attachments);
 
         comments.value = (post.value.comments || []).map((c) => ({
           ...c,
