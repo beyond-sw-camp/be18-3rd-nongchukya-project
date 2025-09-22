@@ -27,16 +27,25 @@
     <div class="form-group">
       <label>첨부파일</label>
       <input type="file" multiple @change="handleFilesUpload" />
-      <ul>
+      <ul class="file-list">
+        <!-- 기존 첨부파일 -->
         <li v-for="(file, index) in existingAttachments" :key="file.attachmentId">
-          <a :href="file.fileUrl" target="_blank">{{ file.originalName }}</a>
-          <button type="button" @click="removeExistingAttachment(index)">삭제</button>
+          <a :href="file.fileUrl" target="_blank" class="file-name">{{ file.originalName }}</a>
+          <button type="button" class="delete-file-btn" @click="removeExistingAttachment(index)">✕</button>
         </li>
-        <li v-for="(file, index) in newFiles" :key="index">{{ file.name }}</li>
+        <!-- 새로 추가된 파일 -->
+        <li v-for="(file, index) in newFiles" :key="index">
+          <span class="file-name">{{ file.name }}</span>
+          <button type="button" class="delete-file-btn" @click="newFiles.splice(index,1)">✕</button>
+        </li>
       </ul>
     </div>
 
-    <button @click="updatePost">저장</button>
+    <!-- 버튼 -->
+    <div class="form-actions">
+      <button class="submit-btn" @click="updatePost">저장</button>
+      <button class="cancel-btn" type="button" @click="$router.push(`/community/posts/${postId}`)">취소</button>
+    </div>
   </div>
 </template>
 
@@ -62,39 +71,33 @@ export default {
     ]);
     const existingAttachments = ref([]);
     const newFiles = ref([]);
-    const deletedAttachmentIds = ref([]); // 삭제할 첨부파일 ID 저장
+    const deletedAttachmentIds = ref([]);
 
-    // 기존 게시글 불러오기
     const fetchPost = async () => {
       try {
         const res = await axios.get(
           `http://localhost:8080/api/v1/community/posts/${postId}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        const post = res.data.items[0];
+        const post = Array.isArray(res.data.items) ? res.data.items[0] : res.data.items;
         title.value = post.title;
         content.value = post.content;
-        categoryId.value = post.categoryId; // 백엔드에서 내려주는 categoryId
+        categoryId.value = post.categoryId;
         existingAttachments.value = post.attachments || [];
       } catch (err) {
         console.error("게시글 로딩 실패", err);
       }
     };
 
-    // 파일 선택
     const handleFilesUpload = (e) => {
-      newFiles.value = Array.from(e.target.files);
+      newFiles.value = [...newFiles.value, ...Array.from(e.target.files)];
     };
 
-    // 기존 첨부파일 삭제
     const removeExistingAttachment = (index) => {
       deletedAttachmentIds.value.push(existingAttachments.value[index].attachmentId);
       existingAttachments.value.splice(index, 1);
-
-      console.log("deletedAttachmentIds:", deletedAttachmentIds.value); // 삭제 대상 확인
     };
 
-    // 게시글 수정
     const updatePost = async () => {
       try {
         const formData = new FormData();
@@ -102,22 +105,14 @@ export default {
           title: title.value,
           content: content.value,
           categoryId: categoryId.value,
-          attachmentIds: existingAttachments.value.map((f) => f.attachmentId),
-          deleteAttachmentIds: deletedAttachmentIds.value,
+          attachmentIds: existingAttachments.value.map(f => f.attachmentId),
+          deleteAttachmentIds: deletedAttachmentIds.value
         };
-
         formData.append(
           "updatePostRequestDto",
           new Blob([JSON.stringify(updateData)], { type: "application/json" })
         );
-
-        newFiles.value.forEach((file) => formData.append("files", file));
-
-        // 디버깅용
-        console.log("updateData:", updateData);
-        for (const pair of formData.entries()) {
-          console.log(pair[0], pair[1]);
-        }
+        newFiles.value.forEach(file => formData.append("files", file));
 
         await axios.put(
           `http://localhost:8080/api/v1/community/posts/${postId}`,
@@ -125,11 +120,10 @@ export default {
           {
             headers: {
               Authorization: `Bearer ${token}`,
-              "Content-Type": "multipart/form-data",
-            },
+              "Content-Type": "multipart/form-data"
+            }
           }
         );
-
         alert("게시글이 수정되었습니다.");
         router.push(`/community/posts/${postId}`);
       } catch (err) {
@@ -151,38 +145,134 @@ export default {
       handleFilesUpload,
       removeExistingAttachment,
       updatePost,
+      postId
     };
-  },
+  }
 };
 </script>
 
 <style scoped>
 .update-post-container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
+  max-width: 700px;
+  margin: 40px auto;
+  padding: 30px;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+h1 {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 30px;
+  color: #333;
+  text-align: center;
 }
 
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: 25px;
+}
+
+label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: #555;
 }
 
 input[type="text"],
 textarea,
 select {
   width: 100%;
-  padding: 10px;
-  font-size: 14px;
-  border-radius: 6px;
+  padding: 12px 14px;
+  font-size: 15px;
+  border-radius: 8px;
   border: 1px solid #ccc;
+  transition: all 0.2s;
 }
 
-button {
-  padding: 10px 20px;
-  background-color: #1a73e8;
+input[type="text"]:focus,
+textarea:focus,
+select:focus {
+  border-color: #1a73e8;
+  box-shadow: 0 0 0 2px rgba(26,115,232,0.2);
+  outline: none;
+}
+
+textarea {
+  min-height: 140px;
+  resize: vertical;
+}
+
+.file-list {
+  list-style: none;
+  padding: 0;
+  margin-top: 8px;
+}
+
+.file-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f9f9f9;
+  padding: 6px 10px;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+
+.file-name {
+  word-break: break-all;
+}
+
+.delete-file-btn {
+  border: none;
+  background: none;
+  color: #e74c3c;
+  font-weight: bold;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.delete-file-btn:hover {
+  color: #c0392b;
+}
+
+.form-actions {
+  display: flex;
+  gap: 15px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.submit-btn {
+  padding: 10px 25px;
+  background: linear-gradient(90deg, #1a73e8, #4285f4);
   color: #fff;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
+  font-weight: 600;
   cursor: pointer;
+  transition: all 0.3s;
+}
+
+.submit-btn:hover {
+  background: linear-gradient(90deg, #1558b0, #1a49a0);
+}
+
+.cancel-btn {
+  padding: 10px 25px;
+  background-color: #e0e0e0;
+  color: #555;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cancel-btn:hover {
+  background-color: #bdbdbd;
+  color: #333;
 }
 </style>

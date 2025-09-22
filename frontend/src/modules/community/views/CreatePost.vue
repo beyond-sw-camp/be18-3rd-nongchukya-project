@@ -27,12 +27,19 @@
     <div class="form-group">
       <label>첨부파일</label>
       <input type="file" multiple @change="handleFilesUpload" />
-      <ul>
-        <li v-for="(file, index) in newFiles" :key="index">{{ file.name }}</li>
+      <ul class="file-list">
+        <li v-for="(file, index) in newFiles" :key="index">
+          <span class="file-name">{{ file.name }}</span>
+          <button type="button" class="delete-file-btn" @click="removeFile(index)">✕</button>
+        </li>
       </ul>
     </div>
 
-    <button @click="submitPost">작성 완료</button>
+    <!-- 작성/취소 버튼 -->
+    <div class="form-actions">
+      <button class="submit-btn" @click="submitPost">작성 완료</button>
+      <button class="cancel-btn" type="button" @click="cancelPost">취소</button>
+    </div>
   </div>
 </template>
 
@@ -54,13 +61,20 @@ const categories = ref([
 ]);
 const newFiles = ref([]);
 
-// 첨부파일 선택
 const handleFilesUpload = (e) => {
   newFiles.value = [...newFiles.value, ...Array.from(e.target.files)];
 };
 
-// 게시글 작성
+const removeFile = (index) => {
+  newFiles.value.splice(index, 1);
+};
+
 const submitPost = async () => {
+  if (!title.value.trim() || !content.value.trim() || !categoryId.value) {
+    alert("제목, 내용, 카테고리를 모두 입력해주세요.");
+    return;
+  }
+
   try {
     const formData = new FormData();
     const postData = {
@@ -69,18 +83,12 @@ const submitPost = async () => {
       categoryId: categoryId.value
     };
 
-    // ⚠️ 서버에서 @RequestPart("postRequestDto") 이므로 이름 정확히 맞춰야 함
     formData.append(
       "postRequestDto",
       new Blob([JSON.stringify(postData)], { type: "application/json" })
     );
 
-    newFiles.value.forEach(file => formData.append("files", file)); // 서버에서도 files로 받고 있음
-
-    // 디버깅용
-    for (const pair of formData.entries()) {
-      console.log(pair[0], pair[1]);
-    }
+    newFiles.value.forEach(file => formData.append("files", file));
 
     await axios.post(
       "http://localhost:8080/api/v1/community/posts",
@@ -102,43 +110,131 @@ const submitPost = async () => {
   }
 };
 
+const cancelPost = () => {
+  if (confirm("작성 중인 내용을 취소하시겠습니까?")) {
+    router.push("/community/posts");
+  }
+};
 </script>
 
 <style scoped>
 .create-post-container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
+  max-width: 700px;
+  margin: 40px auto;
+  padding: 30px;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+h1 {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 30px;
+  color: #333;
+  text-align: center;
 }
 
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: 25px;
+}
+
+label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: #555;
 }
 
 input[type="text"],
 textarea,
 select {
   width: 100%;
-  padding: 10px;
-  font-size: 14px;
-  border-radius: 6px;
+  padding: 12px 14px;
+  font-size: 15px;
+  border-radius: 8px;
   border: 1px solid #ccc;
+  transition: all 0.2s;
+}
+
+input[type="text"]:focus,
+textarea:focus,
+select:focus {
+  border-color: #1a73e8;
+  box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+  outline: none;
 }
 
 textarea {
-  min-height: 120px;
+  min-height: 140px;
+  resize: vertical;
 }
 
-button {
-  padding: 10px 20px;
-  background-color: #1a73e8;
+.file-list {
+  list-style: none;
+  padding: 0;
+  margin-top: 8px;
+}
+
+.file-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f9f9f9;
+  padding: 6px 10px;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+
+.delete-file-btn {
+  border: none;
+  background: none;
+  color: #e74c3c;
+  font-weight: bold;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.delete-file-btn:hover {
+  color: #c0392b;
+}
+
+.form-actions {
+  display: flex;
+  gap: 15px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.submit-btn {
+  padding: 10px 25px;
+  background: linear-gradient(90deg, #1a73e8, #4285f4);
   color: #fff;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
+  font-weight: 600;
   cursor: pointer;
+  transition: all 0.3s;
 }
 
-button:hover {
-  background-color: #1558b0;
+.submit-btn:hover {
+  background: linear-gradient(90deg, #1558b0, #1a49a0);
+}
+
+.cancel-btn {
+  padding: 10px 25px;
+  background-color: #e0e0e0;
+  color: #555;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cancel-btn:hover {
+  background-color: #bdbdbd;
+  color: #333;
 }
 </style>
