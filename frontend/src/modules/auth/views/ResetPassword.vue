@@ -39,24 +39,37 @@
 
 <script setup>
 import { ref, computed } from "vue"
-import { useRouter } from "vue-router"
+import { useRouter, useRoute } from "vue-router"
+import api from "@/api/axios"
 
 const router = useRouter()
+const route = useRoute()
+
 const password = ref("")
 const confirmPassword = ref("")
+const email = route.query.email || ""  // ForgotPassword.vue에서 넘겨준 이메일
 
 const passwordMismatch = computed(() => {
   return confirmPassword.value && password.value !== confirmPassword.value
 })
 
-function resetPassword() {
+async function resetPassword() {
   if (passwordMismatch.value) {
+    alert("비밀번호가 일치하지 않습니다.")
     return
   }
-  console.log("새 비밀번호:", password.value)
 
-  alert("비밀번호가 성공적으로 변경되었습니다! 로그인 화면으로 이동합니다.")
-  router.push("/login") 
+  try {
+    await api.post("/api/v1/auth/reset-password", {
+      email: email,
+      newPassword: password.value
+    })
+    alert("비밀번호가 성공적으로 변경되었습니다! 다시 로그인 해주세요.")
+    router.push("/login")
+  } catch (err) {
+    console.error("❌ 비밀번호 재설정 실패:", err)
+    alert("비밀번호 재설정 실패: " + (err.response?.data?.message || err.message))
+  }
 }
 </script>
 
@@ -93,7 +106,6 @@ p {
   line-height: 1.4;
   font-size: 12px;
 }
-
 .reset-form {
   width: 100%;
   display: flex;
@@ -124,7 +136,6 @@ p {
   font-size: 0.92rem;
   margin-top: 0.2rem;
 }
-
 .submit-btn {
   align-self: center;
   width: 30%;

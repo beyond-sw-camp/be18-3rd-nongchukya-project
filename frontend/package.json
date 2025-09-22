@@ -21,7 +21,7 @@
     "sockjs-client": "^1.6.1",
     "vue": "^3.5.18",
     "vue-router": "^4.5.1",
-    "vuetify": "^3.9.6",
+    "vuetify": "^3.10.2",
     "webstomp-client": "^1.2.6"
   },
   "devDependencies": {
