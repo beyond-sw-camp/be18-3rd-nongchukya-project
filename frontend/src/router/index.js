@@ -54,8 +54,8 @@ const routes = [
   { path: '/', name: 'Home', component: Home },
   { path: '/notification', name: 'NotificationPage', component: NotificationPage},
   { path: '/chatrooms/list', name: 'MyChatPage', component: MyChatPage},
-  { path: '/friends/list', name: 'FriendsList', component: FriendsList },
-]
+  { path: '/friends/list', name: 'FriendsList', component: FriendsList }
+
 
 const router = createRouter({
   history: createWebHistory(),
