@@ -60,7 +60,7 @@ const routes = [
 
   { path: '/mypage', name: 'Mypage', component: Mypage }
 
-
+]
 
 
 const router = createRouter({
