@@ -1,12 +1,15 @@
 import { createApp } from 'vue'
 import App from './App.vue'
-import router from './router'  
+import router from './router'
+import { createPinia } from 'pinia'
 import '@mdi/font/css/materialdesignicons.css'
 import vuetify from './plugins/vuetify'
-import { createPinia } from 'pinia'
-import 'bootstrap/dist/css/bootstrap.css'
-import 'bootstrap/dist/js/bootstrap.bundle.js'
 
+// Bootstrap CSS
+import 'bootstrap/dist/css/bootstrap.min.css'
+
+// Bootstrap JS
+import 'bootstrap/dist/js/bootstrap.bundle.min.js'
 
 
 const app = createApp(App)
