@@ -54,10 +54,12 @@ const routes = [
   { path: '/notification', name: 'NotificationPage', component: NotificationPage},
   { path: '/chatrooms/list', name: 'MyChatPage', component: MyChatPage},
 
-
+  // Friends
   { path: '/friends/list', name: 'FriendsList', component: FriendsList },
+  { path: '/friends/requests', name: 'FriendRequestsList', component: FriendRequestsList },
+  { path: '/friends/requests/send', name: 'SendFriendRequest', component: SendFriendRequest },
 
-
+  // MyPage
   { path: '/mypage', name: 'Mypage', component: Mypage }
 
 ]
