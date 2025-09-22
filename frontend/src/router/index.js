@@ -54,11 +54,13 @@ const routes = [
   { path: '/notification', name: 'NotificationPage', component: NotificationPage},
   { path: '/chatrooms/list', name: 'MyChatPage', component: MyChatPage},
 
+
   { path: '/friends/list', name: 'FriendsList', component: FriendsList },
 
 
   { path: '/mypage', name: 'Mypage', component: Mypage }
-]
+
+
 
 
 const router = createRouter({
