@@ -2,51 +2,83 @@
   <div class="post-detail-container">
     <!-- 게시글 카드 -->
     <div class="post-card">
-      <!-- 제목 -->
       <h1 class="post-title">{{ post.title }}</h1>
 
-      <!-- 작성자 정보 -->
       <div class="post-author-info">
         <div class="author-left">
-          <img v-if="post.profileImg" :src="post.profileImg" alt="프로필" class="profile-img" />
-          <span class="author-name">{{ post.userNickname }}</span>
+          <img
+            :src="post?.userProfileImage ? `http://localhost:8080${post.userProfileImage}` : '/images/default-profile.png'"
+            alt="프로필"
+            class="profile-img"
+          />
+          <span class="author-name">{{ post?.userNickname || '알 수 없음' }}</span>
         </div>
-        <span class="updated-time">{{ formatDate(post.updatedAt) }}</span>
+        <span class="updated-time">
+          {{ formatDate(post?.updatedAt) }}
+          <span v-if="post?.updated" class="edited-label">(수정됨)</span>
+        </span>
       </div>
 
-      <!-- 내용 -->
-      <div class="post-content">{{ post.content }}</div>
+      <div class="post-content">{{ post?.content || '내용이 없습니다.' }}</div>
 
-      <!-- 작성자 버튼 -->
-      <div class="post-actions-author" v-if="post.author">
+      <div class="post-actions-author" v-if="post?.author">
         <button @click="$router.push({ name: 'update-post', params: { postId } })">✏ 수정</button>
-        <button @click="deletePost">🗑 삭제</button>
+        <button @click="deletePost" :disabled="deleting">🗑 삭제</button>
       </div>
 
-      <!-- 좋아요 버튼 중앙 -->
       <div class="post-actions">
-        <button @click="toggleLike" class="like-btn">
-          <span :class="{'liked': post.isLiked}">❤️</span>
-          <span class="like-count">{{ post.likeCount || 0 }}</span>
+        <button @click="toggleLike" class="like-btn" :disabled="liking">
+          <span :class="{'liked': post?.isLiked}">❤️</span>
+          <span class="like-count">{{ post?.likeCount || 0 }}</span>
         </button>
       </div>
 
-      <!-- 첨부파일 -->
-      <div class="attachments" v-if="post.attachments?.length">
+      <div class="attachments" v-if="post?.attachments?.length">
         <a
           v-for="file in post.attachments"
           :key="file.attachmentId"
-          :href="`http://localhost:8080${file.fileUrl}`" target="_blank" rel="noopener"
+          :href="`http://localhost:8080${file.fileUrl}`"
+          target="_blank"
+          rel="noopener"
         >
           📎 {{ file.originalName }}
         </a>
       </div>
     </div>
 
+    <!-- 이전/다음 글 -->
+    <div class="post-navigation">
+      <div class="neighbor-card previous-post" v-if="neighbors.previous?.postId">
+        <router-link
+          :to="{ name: 'post-detail', params: { postId: neighbors.previous.postId }, query: route.query }"
+        >
+          <span class="arrow">←</span>
+          <span class="label">이전 글</span>
+          <span class="title">{{ neighbors.previous.title }}</span>
+        </router-link>
+      </div>
+      <div class="neighbor-card previous-post" v-else>
+        <span>이전 글이 없습니다.</span>
+      </div>
+
+      <div class="neighbor-card next-post" v-if="neighbors.next?.postId">
+        <router-link
+          :to="{ name: 'post-detail', params: { postId: neighbors.next.postId }, query: route.query }"
+        >
+          <span class="label">다음 글</span>
+          <span class="title">{{ neighbors.next.title }}</span>
+          <span class="arrow">→</span>
+        </router-link>
+      </div>
+      <div class="neighbor-card next-post" v-else>
+        <span>다음 글이 없습니다.</span>
+      </div>
+    </div>
+
     <!-- 댓글 입력 -->
     <div class="comment-input">
       <input v-model="newComment" placeholder="댓글을 입력해주세요." />
-      <button @click="addComment">등록</button>
+      <button @click="addComment" :disabled="postingComment">등록</button>
     </div>
 
     <!-- 댓글 리스트 -->
@@ -55,8 +87,8 @@
         v-for="comment in comments"
         :key="comment.commentId"
         :comment="comment"
-        :postId="postId"
-        :token="token"
+        :post-id="postId || 0"
+        :token="token || ''"
         @refresh-comments="fetchPost"
       />
     </ul>
@@ -64,7 +96,7 @@
 </template>
 
 <script>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
 import CommentNode from "../components/CommentNode.vue";
@@ -74,51 +106,63 @@ export default {
   setup() {
     const route = useRoute();
     const router = useRouter();
-    const postId = route.params.postId;
+    const postId = ref(route.params.postId);
 
     const post = ref({});
     const comments = ref([]);
     const newComment = ref("");
-    const token = localStorage.getItem("accessToken");
+    const token = localStorage.getItem("accessToken") || "";
+    const neighbors = ref({ previous: {}, next: {} });
 
-    const formatDate = (dateStr) => new Date(dateStr).toLocaleString();
+    const liking = ref(false);
+    const deleting = ref(false);
+    const postingComment = ref(false);
 
-    const fetchPost = async () => {
+    const formatDate = (dateStr) => {
+      const date = new Date(dateStr);
+      return isNaN(date) ? "" : date.toLocaleString();
+    };
+
+    // 게시글 불러오기
+    const fetchPost = async (id = postId.value, query = route.query) => {
       try {
-        const res = await axios.get(
-          `http://localhost:8080/api/v1/community/posts/${postId}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        post.value = Array.isArray(res.data.items) ? res.data.items[0] : res.data.items;
+        const res = await axios.get(`http://localhost:8080/api/v1/community/posts/${id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+          params: query,
+        });
+        post.value = Array.isArray(res.data.items) ? res.data.items[0] : res.data.items || {};
         comments.value = (post.value.comments || []).map((c) => ({ ...c, replies: c.replies || [] }));
       } catch (err) {
         console.error("게시글 로딩 실패", err);
+        alert("게시글을 불러오는데 실패했습니다.");
       }
     };
 
-    const editPost = () => {
-      router.push(`/posts/${postId}/edit`);
-    };
-
-    const deletePost = async () => {
-      if (!confirm("정말 삭제하시겠습니까?")) return;
+    // 이전/다음 글 불러오기
+    const fetchNeighbors = async (id = postId.value) => {
       try {
-        await axios.delete(
-          `http://localhost:8080/api/v1/community/posts/${postId}`,
-          { headers: { Authorization: `Bearer ${token}` } }
+        const category = route.query.category || null;
+        const res = await axios.get(
+          `http://localhost:8080/api/v1/community/posts/${id}/neighbors`,
+          { headers: { Authorization: `Bearer ${token}` }, params: { category } }
         );
-        alert("게시글이 삭제되었습니다.");
-        router.push("/");
+        neighbors.value = {
+          previous: res.data?.previous || {},
+          next: res.data?.next || {},
+        };
       } catch (err) {
-        console.error("게시글 삭제 실패", err);
+        console.error("이전/다음글 로딩 실패", err);
+        neighbors.value = { previous: {}, next: {} };
       }
     };
 
+    // 댓글 작성
     const addComment = async () => {
       if (!newComment.value.trim()) return;
+      postingComment.value = true;
       try {
         const res = await axios.post(
-          `http://localhost:8080/api/v1/community/posts/${postId}/comments`,
+          `http://localhost:8080/api/v1/community/posts/${postId.value}/comments`,
           { content: newComment.value },
           { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -126,23 +170,62 @@ export default {
         newComment.value = "";
       } catch (err) {
         console.error("댓글 작성 실패", err);
+        alert("댓글 작성에 실패했습니다.");
+      } finally {
+        postingComment.value = false;
       }
     };
 
+    // 좋아요
     const toggleLike = async () => {
+      if (liking.value) return;
+      liking.value = true;
       try {
         await axios.post(
-          `http://localhost:8080/api/v1/community/posts/${postId}/like`,
+          `http://localhost:8080/api/v1/community/posts/${postId.value}/like`,
           {},
           { headers: { Authorization: `Bearer ${token}` } }
         );
         fetchPost();
       } catch (err) {
         console.error("좋아요 실패", err);
+        alert("좋아요를 누르는데 실패했습니다.");
+      } finally {
+        liking.value = false;
       }
     };
 
-    onMounted(fetchPost);
+    // 게시글 삭제
+    const deletePost = async () => {
+      if (!confirm("정말 삭제하시겠습니까?")) return;
+      deleting.value = true;
+      try {
+        await axios.delete(`http://localhost:8080/api/v1/community/posts/${postId.value}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        alert("게시글이 삭제되었습니다.");
+        router.push({ name: "posts" });
+      } catch (err) {
+        console.error("게시글 삭제 실패", err);
+        alert("게시글 삭제에 실패했습니다.");
+      } finally {
+        deleting.value = false;
+      }
+    };
+
+    onMounted(() => {
+      fetchPost();
+      fetchNeighbors();
+    });
+
+    watch(
+      () => route.params.postId,
+      (newId) => {
+        postId.value = newId;
+        fetchPost(newId, route.query);
+        fetchNeighbors(newId);
+      }
+    );
 
     return {
       post,
@@ -150,16 +233,21 @@ export default {
       newComment,
       postId,
       token,
+      neighbors,
+      route,
       formatDate,
       fetchPost,
       addComment,
       toggleLike,
-      editPost,
       deletePost,
+      liking,
+      deleting,
+      postingComment,
     };
   },
 };
 </script>
+
 
 <style scoped>
 .post-detail-container {
@@ -355,4 +443,70 @@ export default {
   list-style: none;
   padding: 0;
 }
+
+.post-navigation {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  margin: 20px 0;
+  flex-wrap: wrap;
+}
+
+.neighbor-card {
+  flex: 1 1 48%;
+  background-color: #f9f9f9;
+  border-radius: 12px;
+  padding: 16px 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.neighbor-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+}
+
+.neighbor-card a {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+}
+
+.neighbor-card .arrow {
+  font-size: 20px;
+  margin-right: 10px;
+  color: #1a73e8;
+}
+
+.next-post .arrow {
+  margin-left: 10px;
+  margin-right: 0;
+}
+
+.neighbor-card .label {
+  font-size: 13px;
+  color: #888;
+  margin-right: 6px;
+}
+
+.neighbor-card .title {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.neighbor-card span {
+  display: block;
+  text-align: center;
+  color: #444;              /* 연한 회색 */
+  font-weight: 500;
+  padding: 12px 0;
+  border-radius: 8px;
+  background-color: #fafafa;
+  transition: background 0.2s, color 0.2s;
+}
+
 </style>
