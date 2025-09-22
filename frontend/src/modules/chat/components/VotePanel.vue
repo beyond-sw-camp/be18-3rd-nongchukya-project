@@ -135,9 +135,23 @@ export default {
     async createVote() {
       const options = this.newVote.optionsText.split(/[\n,]/).map(s=>s.trim()).filter(Boolean)
       if (!this.newVote.title || options.length===0) return
-      await api.post(`/api/v1/vote/chatrooms/${this.roomId}`, { title: this.newVote.title, options })
-      this.createVoteDialog=false; this.newVote={ title:'', optionsText:'' }
-      this.openVoteList()
+      try {
+        await api.post(`/api/v1/vote/chatrooms/${this.roomId}`, { title: this.newVote.title, options });
+        this.createVoteDialog=false;
+        this.newVote={ title:'', optionsText:'' };
+        this.openVoteList();
+      } catch (error) {
+        const {status, message} = error.response.data;
+
+        if(status === 'CHATROOM_NOT_FOUND'){
+          alert(message);
+          this.$router.push('/chatrooms/lis');
+        }else if(status === 'VOTE_INVALID_INPUT'){
+          alert(message);
+        }
+      }
+      
+      
     },
     async openVoteList() {
       this.actionsMenu=false
@@ -147,15 +161,35 @@ export default {
     },
     openCastVote(v) { this.activeVote=v; this.selectedOption=null; this.castDialog=true },
     async castVote() {
-      await api.post(`/api/v1/vote/${this.activeVote.voteId}/vote`, { selectedOption: this.selectedOption })
-      this.castDialog=false
-      await this.openResult(this.activeVote)
+      try {
+        await api.post(`/api/v1/vote/${this.activeVote.voteId}/vote`, { selectedOption: this.selectedOption })
+        this.castDialog=false
+        await this.openResult(this.activeVote)
+      } catch (error) {
+        const {status, message} = error.response.data;
+
+        if(status === 'VOTE_NOT_FOUND'){
+          alert(message);
+        }else if(status === 'ALREADY_CASTED_VOTE'){
+          alert(message);
+        }
+      }
+      
     },
     async openResult(v) {
       this.activeVote=v
-      const { data } = await api.get(`/api/v1/vote/${v.voteId}/results`)
-      this.voteResult = data.items?.[0] || {}
-      this.resultDialog=true
+      try {
+        const { data } = await api.get(`/api/v1/vote/${v.voteId}/results`)
+        this.voteResult = data.items?.[0] || {}
+        this.resultDialog=true
+      } catch (error) {
+        const {status, message} = error.response.data;
+
+        if(status === 'VOTE_NOT_FOUND'){
+          alert(message);
+        }
+      }
+      
     },
     parsedOptions(vote) {
       if (!vote || !vote.options) return []

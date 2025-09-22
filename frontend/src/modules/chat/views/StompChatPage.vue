@@ -52,6 +52,9 @@ export default {
       subscription: null,
       token: '',
       senderNickname: null,
+      roomDeleted: false,   
+      cleaned: false,       
+      members: [],
     }
   },
   computed: {
@@ -97,7 +100,17 @@ export default {
               } catch {
                 body = { senderNickname: '시스템', message: message.body }
               }
+              if (body.type === 'ROOM_DELETED') {
+                this.roomDeleted = true;
+                const msg = body.message || '매칭이 취소되어 채팅방이 사라졌습니다.';
+                sessionStorage.setItem('global_notice', msg);
+                this.$router.replace('/');
+                return;
+              }
               this.messages.push(body)
+              if(body.senderNickname && !this.members.includes(body.senderNickname)){
+                this.members.push(body.senderNickname);
+              }
               this.$nextTick(() => {
                 const box = this.$el.querySelector('.chat-box')
                 if (box) box.scrollTop = box.scrollHeight
@@ -119,17 +132,26 @@ export default {
       this.newMessage = ''
     },
     async cleanup() {
+      if(this.cleaned) return
+      this.cleaned = true;
       try {
-        await api.post(
-          `/api/v1/chatrooms/${this.effectiveRoomId}/read`
-        )
-      } catch {alert('');}
+        if (!this.roomDeleted) {
+          await api.post(`/api/v1/chatrooms/${this.effectiveRoomId}/read`)
+        }
+      } catch (e) {const s = e?.response?.status
+        if (s !== 404 && s !== 410) {
+          // console.debug('mark read failed', e)
+        };}
       try {
         this.subscription?.unsubscribe()
-      } catch {alert('');}
+      } catch {
+        //
+      }
       try {
         this.stompClient?.disconnect()
-      } catch {alert('');}
+      } catch {
+        //
+      }
     },
     initials(name) {
       return (name || '?').trim().charAt(0).toUpperCase();

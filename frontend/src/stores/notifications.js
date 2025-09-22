@@ -53,7 +53,7 @@ export const useNotificationStore = defineStore('notifications', {
       if (!token || this.es) return
 
       if (this.es) {
-        try { this.es.close() } catch {alert('')}
+        try { this.es.close() } catch {alert('오류')}
         this.es = null
       }
 
