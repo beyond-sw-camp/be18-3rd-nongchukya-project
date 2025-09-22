@@ -12,6 +12,7 @@ import CreatePost from '@/modules/community/views/CreatePost.vue'
 import Home from '@/views/Home.vue'  
 import NotificationPage from '@/modules/chat/views/NotificationPage.vue'
 import MyChatPage from '@/modules/chat/views/MyChatPage.vue'
+import FriendsList from '@/modules/friends/views/FriendsList.vue'
 
 
 const routes = [
@@ -50,12 +51,10 @@ const routes = [
   },
 
   // Home
-  { path: '/', name: 'Home', component: Home }
   { path: '/', name: 'Home', component: Home },
   { path: '/notification', name: 'NotificationPage', component: NotificationPage},
   { path: '/chatrooms/list', name: 'MyChatPage', component: MyChatPage},
   { path: '/friends/list', name: 'FriendsList', component: FriendsList },
-  { path: '/friends/requests', name: 'FriendRequestsList', component: FriendRequestsList }
 ]
 
 const router = createRouter({
