@@ -12,15 +12,16 @@
       </tr>
     </thead>
     <tbody>
-      <tr v-for="match in matches" :key="match.id">
+      <tr v-for="match in completedMatches" :key="match.id">
         <td>{{ match.sport }}</td>
         <td>{{ match.region }}</td>
         <td>{{ match.matchDate }}</td>
         <td>{{ match.matchTime }}</td>
         <td>{{ getGenderText(match.genderOption) }}</td>
-        <td>{{ match.currentCount }}/{{ match.requiredCount }}</td>
+        <!-- 인원을 누르면 참가자 확인할 수 있도록 수정 -->
+        <td>{{ match.playerCount }}</td>
         <td>
-          <button
+          <button v-if="isCancellable(match.matchDate)"
             type="button"
             class="btn btn-sm btn-danger"
             @click="$emit('cancel-click', match.id)">
@@ -34,7 +35,7 @@
 
 <script setup>
   const props = defineProps({
-    matches: {
+    completedMatches: {
       type: Array,
       required: true
     }
@@ -52,6 +53,18 @@
     }
     
     return genderOption;
+  };
+
+  const isCancellable = (dateString) => {
+    // 1. 오늘 날짜를 가져와서 시간, 분, 초는 0으로 설정합니다. (날짜만 비교하기 위함)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // 2. 파라미터로 받은 경기 날짜(문자열)를 Date 객체로 변환합니다.
+    const matchDate = new Date(dateString);
+
+    // 3. 경기 날짜가 오늘보다 크거나 같으면 true를 반환합니다.
+    return matchDate >= today;
   };
 </script>
 

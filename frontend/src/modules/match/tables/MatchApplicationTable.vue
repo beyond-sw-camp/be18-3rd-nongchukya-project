@@ -7,23 +7,26 @@
         <th>경기일</th>
         <th>시간</th>
         <th>성별</th>
-        <th>인원</th>
+        <th>신청시각</th>
+        <th>상태</th>
         <th>취소</th>
       </tr>
     </thead>
     <tbody>
-      <tr v-for="match in matches" :key="match.id">
-        <td>{{ match.sport }}</td>
-        <td>{{ match.region }}</td>
-        <td>{{ match.matchDate }}</td>
-        <td>{{ match.matchTime }}</td>
-        <td>{{ getGenderText(match.genderOption) }}</td>
-        <td>{{ match.currentCount }}/{{ match.requiredCount }}</td>
+      <tr v-for="matchApplication in matchApplications" :key="matchApplication.id">
+        <td>{{ matchApplication.sport }}</td>
+        <td>{{ matchApplication.region }}</td>
+        <td>{{ matchApplication.matchDate }}</td>
+        <td>{{ matchApplication.matchTime }}</td>
+        <td>{{ getGenderText(matchApplication.genderOption) }}</td>
+        <td>{{ matchApplication.createdAt }}</td>
+        <td>{{ matchApplication.status }}</td>
         <td>
           <button
+            v-if="matchApplication.status === 'WAITING'"
             type="button"
             class="btn btn-sm btn-danger"
-            @click="$emit('cancel-click', match.id)">
+            @click="$emit('cancel-click', matchApplication.id)">
             취소
           </button>
         </td>
@@ -34,7 +37,7 @@
 
 <script setup>
   const props = defineProps({
-    matches: {
+    matchApplications: {
       type: Array,
       required: true
     }

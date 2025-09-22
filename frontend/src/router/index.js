@@ -18,7 +18,7 @@ const routes = [
   { path: '/matchApplication/add', name: 'matchApplication/add', component: AddMatchApplication },
   { path: '/matchApplications', name: 'matchApplications', component: MatchApplications },
   { path: '/matches', name: 'matches', component: Matches },
-  { path: '/CompletedMatches', name: 'CompletedMatches', component: CompletedMatches }
+  { path: '/completedMatches', name: 'completedMatches', component: CompletedMatches},
 ]
 
 const router = createRouter({

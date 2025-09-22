@@ -1,9 +1,9 @@
 <template>
     <main>
-        <match-table 
+        <match-application-table 
             :matchApplications="matchApplicationStore.matchApplications"
             @item-click="itemClick"
-            @delete-click="deleteClick"/>
+            @cancel-click="cancelClick"/>
         <page-nation 
             :page-info="matchApplicationStore.pageInfo"
             @change-page="changePage"/>
@@ -12,7 +12,7 @@
 
 <script setup>
 import { onMounted } from 'vue';
-import MatchTable from '../tables/MatchTable.vue';
+import MatchApplicationTable from '../tables/MatchApplicationTable.vue';
 import PageNation from '../common/PageNation.vue';
 import { onBeforeRouteUpdate, useRoute, useRouter } from 'vue-router';
 import { useMatchApplicationStore } from '../stores/matchApplicationStore';
@@ -23,29 +23,29 @@ import { useMatchApplicationStore } from '../stores/matchApplicationStore';
 
     const changePage = ({page, totalPages}) => {
         if(page >= 1 && page <= totalPages) {
-            router.push({name: 'departments', query: {page}});
+            router.push({name: 'matchApplications', query: {page}});
         } 
     };
 
-    const itemClick = (no) => {
-        router.push({name: 'departments/no', params: {no}});
-    };
+    // const itemClick = (no) => {
+    //     router.push({name: 'departments/no', params: {no}});
+    // };
 
-    const deleteClick = async (no) => {
+    const cancelClick = async (no) => {
         try {
-            if(confirm('정말로 삭제하시겠습니까?')) {
-                const result = await matchApplicationStore.deleteDepartment(no);
+            if(confirm('정말로 취소하시겠습니까?')) {
+                const result = await matchApplicationStore.cancelMatchApplication(no);
 
                 if(result.code === 200) {
-                    alert('정상적으로 삭제되었습니다.');
+                    alert('정상적으로 취소되었습니다.');
 
-                    await matchApplicationStore.fetchDepartments(matchApplicationStore.pageInfo.currentPage, 10);
+                    await matchApplicationStore.fetchMatchApplications(matchApplicationStore.pageInfo.currentPage, 10);
                 }
             }
         } catch (error) {
             const {status, message} = error.response.data;
 
-            if(status === 'DEPARTMENT_NOT_FOUND') {
+            if(status === 'MATCH_APPLICATION_NOT_FOUND') {
                 alert(message);
 
             } else if(status === 'REFRESH_TOKEN_INVALID') {

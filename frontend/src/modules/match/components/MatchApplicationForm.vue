@@ -25,9 +25,9 @@
         </div>
         <label for="genderOption" class="form-label">성별</label>
         <select class="form-select" aria-label="Default select example" v-model="formData.genderOption">
-            <option value="상관없음">상관없음</option>
-            <option value="여자만">여자만</option>
-            <option value="남자만">남자만</option>
+            <option value="A">상관없음</option>
+            <option value="F">여자만</option>
+            <option value="M">남자만</option>
         </select>
         <div>
             <button type="submit" class="btn btn-primary m-2">신청</button>
@@ -44,7 +44,7 @@ import { reactive, toRaw } from 'vue';
         matchDate: "",
         startTime: "",
         endTime: "",
-        genderOption: ""
+        genderOption: "A"
     });
 
     const props = defineProps({

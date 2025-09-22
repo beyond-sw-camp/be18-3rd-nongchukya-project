@@ -14,8 +14,5 @@ export const useSportStore = defineStore('sport', () => {
     }
   }
 
-  return {
-    sports,
-    fetchSports,
-  }
+  return { sports, fetchSports }
 })

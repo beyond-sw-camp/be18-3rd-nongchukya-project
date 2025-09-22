@@ -20,16 +20,15 @@ export const useMatchApplicationStore = defineStore('matchApplication', () => {
     };
 
     const addMatchApplication = async (matchApplication) => {
-        console.log(matchApplication.data);
-    
         const response = await api.post('/api/v1/match-service/match-applications', matchApplication);
-
-        console.log(response.data);
-        console.log(response.code);
-        
 
         return response.data;
     };
 
-    return {matchApplications, pageInfo, fetchMatchApplications, addMatchApplication};
+    const cancelMatchApplication = async (applicationId) => {
+        const response = await api.delete(`/api/v1/match-service/match-applications/${applicationId}`);
+        return response.data;
+    };
+
+    return { matchApplications, pageInfo, fetchMatchApplications, addMatchApplication, cancelMatchApplication };
 });
