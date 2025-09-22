@@ -1,91 +1,15 @@
 <template>
   <form class="signup-form" @submit.prevent="onSubmit">
 
+    <!-- 이메일 인증 -->
     <div class="input-group">
       <label for="signup-email">이메일</label>
-      <input
-        id="signup-email"
-        type="email"
-        placeholder="이메일을 입력하세요."
-        v-model="email"
-        required
-      />
-    </div>
-
-    <div class="input-group">
-      <label for="signup-username">아이디</label>
-      <input
-        id="signup-username"
-        type="text"
-        placeholder="아이디를 입력하세요."
-        v-model="username"
-        required
-      />
-
-      <div v-if="username">
-        <span v-if="isUsernameAvailable === true" class="username-available">
-          사용 가능한 아이디입니다.
-        </span>
-        <span v-else-if="isUsernameAvailable === false" class="username-taken">
-          이미 사용중인 아이디입니다.
-        </span>
-      </div>
-    </div>
-
-    <div class="input-group">
-      <label for="signup-password">비밀번호</label>
-      <input
-        id="signup-password"
-        type="password"
-        placeholder="비밀번호를 입력하세요."
-        v-model="password"
-        required
-      />
-    </div>
-
-    <div class="input-group">
-      <label for="signup-password-confirm">비밀번호 확인</label>
-      <input
-        id="signup-password-confirm"
-        type="password"
-        placeholder="비밀번호를 한번 더 입력하세요."
-        v-model="passwordConfirm"
-        required
-      />
-      <div v-if="passwordMismatch">
-        <span class="password-mismatch">비밀번호가 일치하지 않습니다.</span>
-      </div>
-    </div>
-
-    <div class="input-group">
-      <label for="signup-name">이름</label>
-      <input
-        id="signup-name"
-        type="text"
-        placeholder="이름을 입력하세요."
-        v-model="name"
-        required
-      />
-    </div>
-
-    <div class="input-group">
-      <label for="signup-birthdate">생년월일</label>
-      <input
-        id="signup-birthdate"
-        type="date"
-        v-model="birthdate"
-        required
-      />
-    </div>
-
-    <div class="input-group">
-      <label for="signup-phone">전화번호</label>
       <div class="row-input">
         <input
-          id="signup-phone"
-          type="tel"
-          placeholder="전화번호를 입력하세요. (예: 010-1234-5678)"
-          v-model="phone"
+          id="signup-email"
+          type="email"
+          placeholder="이메일을 입력하세요."
+          v-model="email"
           required
         />
         <button type="button" @click="sendVerificationCode">인증요청</button>
@@ -103,6 +27,131 @@
         />
         <button type="button" @click="checkVerificationCode">확인</button>
       </div>
+      <span v-if="verificationSuccess" style="color:green;">이메일 인증 완료</span>
+      <span v-else-if="verificationError" style="color:red;">인증 실패</span>
+    </div>
+
+    <!-- 아이디 -->
+    <div class="input-group">
+      <label for="signup-username">아이디</label>
+      <input
+        id="signup-username"
+        type="text"
+        placeholder="아이디를 입력하세요."
+        v-model="username"
+        required
+      />
+      <div v-if="username">
+        <span v-if="isUsernameAvailable === true" class="username-available">
+          사용 가능한 아이디입니다.
+        </span>
+        <span v-else-if="isUsernameAvailable === false" class="username-taken">
+          이미 사용중인 아이디입니다.
+        </span>
+      </div>
+    </div>
+
+    <!-- 닉네임 -->
+    <div class="input-group">
+      <label for="signup-nickname">닉네임</label>
+      <input
+        id="signup-nickname"
+        type="text"
+        placeholder="닉네임을 입력하세요."
+        v-model="nickname"
+        required
+      />
+    </div>
+
+    <!-- 비밀번호 -->
+    <div class="input-group">
+      <label for="signup-password">비밀번호</label>
+      <input
+        id="signup-password"
+        type="password"
+        placeholder="비밀번호를 입력하세요."
+        v-model="password"
+        required
+      />
+    </div>
+
+    <!-- 비밀번호 확인 -->
+    <div class="input-group">
+      <label for="signup-password-confirm">비밀번호 확인</label>
+      <input
+        id="signup-password-confirm"
+        type="password"
+        placeholder="비밀번호를 한번 더 입력하세요."
+        v-model="passwordConfirm"
+        required
+      />
+      <div v-if="passwordMismatch">
+        <span class="password-mismatch">비밀번호가 일치하지 않습니다.</span>
+      </div>
+    </div>
+
+    <!-- 이름 -->
+    <div class="input-group">
+      <label for="signup-name">이름</label>
+      <input
+        id="signup-name"
+        type="text"
+        placeholder="이름을 입력하세요."
+        v-model="name"
+        required
+      />
+    </div>
+
+    <!-- 생년월일 -->
+    <div class="input-group">
+      <label for="signup-birthdate">생년월일</label>
+      <input
+        id="signup-birthdate"
+        type="date"
+        v-model="birthdate"
+        required
+      />
+    </div>
+
+    <!-- 성별 -->
+    <div class="input-group">
+      <label>성별</label>
+    <div class="radio-group">
+      <label class="radio-option">
+      <input type="radio" value="M" v-model="gender" />
+        <span class="custom-radio"></span>
+        <span class="gender-icon">♂</span> 남자
+      </label>
+      <label class="radio-option">
+      <input type="radio" value="F" v-model="gender" />
+        <span class="custom-radio"></span>
+        <span class="gender-icon">♀</span> 여자
+      </label>
+    </div>
+    </div>
+
+
+    <!-- 주소 -->
+    <div class="input-group">
+      <label for="signup-address">주소</label>
+      <input
+        id="signup-address"
+        type="text"
+        placeholder="주소를 입력하세요."
+        v-model="address"
+        required
+      />
+    </div>
+
+    <!-- 전화번호 -->
+    <div class="input-group">
+      <label for="signup-phone">전화번호</label>
+      <input
+        id="signup-phone"
+        type="tel"
+        placeholder="전화번호를 입력하세요. (예: 010-1234-5678)"
+        v-model="phone"
+      />
     </div>
 
     <button type="submit" class="submit-btn">회원가입</button>
@@ -121,16 +170,25 @@ import api from '@/api/axios'
 
 const router = useRouter()
 
+// 입력 값 상태
 const email = ref('')
 const username = ref('')
+const nickname = ref('')
 const password = ref('')
 const passwordConfirm = ref('')
 const name = ref('')
 const birthdate = ref('')
+const gender = ref('M') 
+const address = ref('')
 const phone = ref('')
+
+// 이메일 인증 관련
 const verificationCode = ref('')
 const verificationSent = ref(false)
+const verificationSuccess = ref(false)
+const verificationError = ref(false)
 
+// 아이디 중복 체크
 const isUsernameAvailable = ref(null)
 let debounceTimer = null
 watch(username, (val) => {
@@ -139,32 +197,60 @@ watch(username, (val) => {
     isUsernameAvailable.value = null
     return
   }
-  debounceTimer = setTimeout(() => {
-    isUsernameAvailable.value = val !== 'testuser'
-  }, 1500)
+  debounceTimer = setTimeout(async () => {
+    try {
+      const res = await api.get(`/api/v1/auth/check-id`, { params: { loginId: val } })
+      isUsernameAvailable.value = res.data.available
+    } catch (err) {
+      console.error("아이디 체크 실패:", err)
+    }
+  }, 500)
 })
 
+// 비밀번호 불일치 체크
 const passwordMismatch = computed(() => {
   return passwordConfirm.value && password.value !== passwordConfirm.value
 })
 
-const sendVerificationCode = () => {
-  if (!phone.value) {
-    alert('전화번호를 입력해주세요.')
+// 이메일 인증 코드 요청
+const sendVerificationCode = async () => {
+  if (!email.value) {
+    alert('이메일을 입력해주세요.')
     return
   }
-  verificationSent.value = true
-  alert(`인증번호가 ${phone.value}로 전송되었습니다.`)
-}
-
-const checkVerificationCode = () => {
-  if (verificationCode.value === '1234') {
-    alert('전화번호 인증 성공!')
-  } else {
-    alert('인증번호가 올바르지 않습니다.')
+  try {
+    await api.post("/api/v1/auth/send-email-code", { email: email.value })
+    verificationSent.value = true
+    verificationSuccess.value = false
+    verificationError.value = false
+    alert(`인증번호가 ${email.value}로 전송되었습니다.`)
+  } catch (err) {
+    alert("이메일 인증 요청 실패: " + (err.response?.data?.message || err.message))
   }
 }
 
+// 이메일 인증 확인
+const checkVerificationCode = async () => {
+  try {
+    const res = await api.post("/api/v1/auth/verify-email-code", {
+      email: email.value,
+      code: verificationCode.value
+    })
+    if (res.data.success) {
+      verificationSuccess.value = true
+      verificationError.value = false
+      alert('이메일 인증 성공!')
+    } else {
+      verificationSuccess.value = false
+      verificationError.value = true
+      alert('인증번호가 올바르지 않습니다.')
+    }
+  } catch (err) {
+    alert("이메일 인증 확인 실패: " + (err.response?.data?.message || err.message))
+  }
+}
+
+// 회원가입 요청
 const onSubmit = async () => {
   if (passwordMismatch.value) {
     alert('비밀번호가 일치하지 않습니다.')
@@ -174,36 +260,36 @@ const onSubmit = async () => {
     alert('이미 사용중인 아이디입니다.')
     return
   }
+  if (!verificationSuccess.value) {
+    alert('이메일 인증을 완료해주세요.')
+    return
+  }
 
   try {
     const res = await api.post("/api/v1/auth/signup", {
       loginId: username.value,
       email: email.value,
       password: password.value,
-      nickname: username.value,   // User 엔티티에 nickname 필드 있어서 넣음
+      nickname: nickname.value,
       name: name.value,
-      age: 20,                    // birthdate → 나이 변환이 필요하다면 여기에서
-      gender: "M",                // 임시 값 (DTO 구조에 맞게 수정 필요)
-      address: "서울시",           // 필수라면 임시 값
+      birthdate: birthdate.value, // ✅ 나이 대신 생년월일만 보냄
+      gender: gender.value,
+      address: address.value,
       phoneNumber: phone.value,
-      dmOption: true,             // 수신 동의 같은 거라면 기본 true
-      status: "ACTIVE",           // 기본 계정 상태
-      profileImage: null,         // 프로필 이미지 없음
-      role: "USER"
+      dmOption: true,
+      status: "ACTIVE"
     })
-    console.log("✅ 회원가입 성공:", res.data)
+    console.log("회원가입 성공:", res.data)
     alert("회원가입이 완료되었습니다. 로그인 페이지로 이동합니다.")
     router.push('/login')
   } catch (err) {
-    console.error("❌ 회원가입 실패:", err.response?.data || err.message)
+    console.error("회원가입 실패:", err.response?.data || err.message)
     alert("회원가입 실패: " + (err.response?.data?.message || err.message))
   }
 }
 </script>
 
-
 <style scoped>
-
 .username-available {
   color: #1abc1a;
   font-size: 0.92rem;
@@ -265,6 +351,51 @@ input {
 .row-input button:hover {
   background-color: #5d90f5;
 }
+
+
+.radio-group {
+  display: flex;
+  gap: 2rem;
+  margin-top: 0.5rem;
+}
+
+.radio-option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  font-size: 1rem;
+  cursor: pointer;
+  user-select: none;
+  font-weight: 500;
+}
+
+.radio-option input[type="radio"] {
+  display: none; /* 기본 라디오 숨김 */
+}
+
+.custom-radio {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #1D61E7;
+  border-radius: 50%;
+  margin-right: 8px;
+  box-sizing: border-box;
+  display: inline-block;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.radio-option input[type="radio"]:checked + .custom-radio {
+  background-color: #1D61E7;
+  border-color: #1D61E7;
+}
+
+.gender-icon {
+  font-size: 1.2rem;
+  margin: 0 5px;
+}
+
+
 
 .submit-btn {
   align-self: center;
