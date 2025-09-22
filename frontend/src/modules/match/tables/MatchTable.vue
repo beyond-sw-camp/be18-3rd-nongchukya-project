@@ -15,8 +15,8 @@
       <tr v-for="matchApplication in matchApplications" :key="matchApplication.id">
         <td>{{ matchApplication.sport }}</td>
         <td>{{ matchApplication.region }}</td>
-        <td>{{ matchApplication.date }}</td>
-        <td>{{ matchApplication.time }}</td>
+        <td>{{ matchApplication.matchDate }}</td>
+        <td>{{ matchApplication.matchTime }}</td>
         <td>{{ matchApplication.genderOption }}</td>
         <td>{{ matchApplication.createdAt }}</td>
         <td>
@@ -28,6 +28,12 @@
 </template>
 
 <script setup>
+  const props = defineProps({
+    matchApplications: {
+      type: Array,
+      required: true
+    }
+  });
 
 </script>
 

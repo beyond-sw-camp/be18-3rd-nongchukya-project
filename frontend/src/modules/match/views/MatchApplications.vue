@@ -66,10 +66,10 @@ import { useMatchApplicationStore } from '../stores/matchApplicationStore';
         } catch (error) {
             const {status, message} = error.response.data;
 
-            if(status === 'DEPARTMENT_NOT_FOUND') {
+            if(status === 'MATCH_APPLICATION_NOT_FOUND') {
                 alert(message);
 
-                router.push({name: 'departments'});
+                router.push({name: 'MatchApplications'});
             } else if(status === 'REFRESH_TOKEN_INVALID') {
                 router.push({name: 'login'});
             } else if(status === 'INTERNAL_SERVER_ERROR') {
@@ -82,14 +82,14 @@ import { useMatchApplicationStore } from '../stores/matchApplicationStore';
         try {
             matchApplicationStore.pageInfo.currentPage = parseInt(to.query.page) || 1;
 
-            await matchApplicationStore.fetchDepartments(matchApplicationStore.pageInfo.currentPage, 10);
+            await matchApplicationStore.fetchMatchApplications(matchApplicationStore.pageInfo.currentPage, 10);
         } catch (error) {
             const {status, message} = error.response.data;
 
             if(status === 'DEPARTMENT_NOT_FOUND') {
                 alert(message);
 
-                router.push({name: 'departments'});
+                router.push({name: 'MatchApplications'});
             } else if(status === 'REFRESH_TOKEN_INVALID') {
                 router.push({name: 'login'});
             } else if(status === 'INTERNAL_SERVER_ERROR') {

@@ -15,10 +15,10 @@
         <div class="tab dropdown-parent">
           <router-link to="/" class="tab-link">Match</router-link>
           <div class="dropdown">
-            <router-link to="/">빠른 매칭 신청</router-link>
+            <router-link :to="{name: 'matchApplication/add'}">매칭 신청</router-link>
             <router-link to="/">매칭 중 조회</router-link>
             <router-link to="/">매칭 결과 조회</router-link>
-            <router-link to="/">매칭 이력 조회</router-link>
+            <router-link :to="{name: 'matchApplications'}">매칭 신청 이력 조회</router-link>
           </div>
         </div>
 

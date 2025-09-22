@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { reactive, ref } from "vue";
-import apiClient from "../api";
+import api from "@/api/axios";
 
 export const useMatchApplicationStore = defineStore('matchApplication', () => {
     const matchApplications = ref([]);
@@ -11,9 +11,8 @@ export const useMatchApplicationStore = defineStore('matchApplication', () => {
         listLimit: 5    // 한 페이지에 표시될 리스트의 수
     });
 
-
     const fetchMatchApplications = async (page, numOfRows) => {
-        const response = await apiClient.get(`/api/v1/match-service/me/match-applications?page=${page}&numOfRows=${numOfRows}`);
+        const response = await api.get(`/api/v1/match-service/me/match-applications?page=${page}&numOfRows=${numOfRows}`);
 
         matchApplications.value = response.data.items;
         pageInfo.totalCount = response.data.totalCount;
@@ -21,7 +20,13 @@ export const useMatchApplicationStore = defineStore('matchApplication', () => {
     };
 
     const addMatchApplication = async (matchApplication) => {
-        const response = await apiClient.post('/api/v1/match-service/match-applications', matchApplication);
+        console.log(matchApplication.data);
+    
+        const response = await api.post('/api/v1/match-service/match-applications', matchApplication);
+
+        console.log(response.data);
+        console.log(response.code);
+        
 
         return response.data;
     };

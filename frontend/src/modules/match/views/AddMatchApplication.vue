@@ -3,6 +3,7 @@
     <div class="form-background">
       <MatchApplicationForm
         :init-form-data="initFormData"
+        :sports="sportStore.sports"
         @form-submit="formSubmit"/>
     </div>
   </main>
@@ -10,17 +11,62 @@
 
 <script setup>
 import MatchApplicationForm from '../components/MatchApplicationForm.vue';
-import { reactive } from 'vue';
+import { reactive, onMounted } from 'vue';
+import { useMatchApplicationStore } from '../stores/matchApplicationStore';
+import { useRouter } from 'vue-router';
+import { useSportStore } from '../stores/sportStore';
 
+    const router = useRouter();
+    const sportStore = useSportStore();
 
     const initFormData = reactive({
         sport: '',
         region: '',
-        date: '',
-        time: '',
-        gender: '상관없음'
+        matchDate: '',
+        startTime: '',
+        endTime: '',
+        genderOption: ''
     });
 
+    const matchApplicationStore = useMatchApplicationStore();
+
+    const formSubmit = async (formData) => {
+        try {
+          console.log(formData);
+          
+            const result = await matchApplicationStore.addMatchApplication(formData);
+            console.log(result);
+            
+            console.log(result.code);
+            
+            console.log(result.data);
+            
+
+            if(result.code === 201) {
+                alert('정상적으로 등록되었습니다.');
+
+                router.push({name: 'matchApplications'});
+            }
+        } catch(error) {
+            const {status, message} = error.response.data;
+
+            if(status === 'BAD_REQUEST') {
+                alert('제대로 입력해 주세요.');
+            } else if(status === 'REFRESH_TOKEN_INVALID') {
+                router.push({name: 'login'});
+            } else if(status === 'INTERNAL_SERVER_ERROR') {
+                alert('에러가 발생했습니다.');
+            } else if(status === 'SPORT_NOT_FOUND') {
+                alert(message);
+            } else if(status === 'DUPLICATE_MATCH_APPLICATION') {
+              alert(message);
+            }
+        }
+    };
+
+    onMounted (async () => {
+        await sportStore.fetchSports();
+    });
 </script>
 
 <style lang="scss" scoped>
