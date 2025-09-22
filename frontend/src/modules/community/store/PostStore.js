@@ -73,15 +73,27 @@ export const usePostStore = defineStore("postStore", () => {
         return response.data.item;
     };
 
-    const searchPosts = async (type, keyword, page = 1, numOfRows = pageInfo.listLimit, sortBy = "latest", sortDir = "desc") => {
-        const response = await api.get(
-            `/api/v1/community/posts/search?type=${type}&keyword=${encodeURIComponent(keyword)}&page=${page}&numOfRows=${numOfRows}&sortBy=${sortBy}&sortDir=${sortDir}`
-        );
+    const searchPosts = async (
+        type,
+        keyword,
+        page = 1,
+        numOfRows = 10,
+        sortBy = "latest",
+        sortDir = "desc"
+        ) => {
+        try {
+            const res = await api.get("/api/v1/community/posts/search", {
+                params: { type, keyword, page, numOfRows, sortBy, sortDir },
+            });
 
-        posts.value = response.data.items;
-        pageInfo.currentPage = page;
-        pageInfo.totalCount = response.data.totalCount;
-        pageInfo.listLimit = numOfRows;
+            // posts와 pageInfo 직접 업데이트
+            posts.value = res.data.items;
+            pageInfo.currentPage = page;
+            pageInfo.totalCount = res.data.totalCount;
+            pageInfo.listLimit = numOfRows;
+        } catch (err) {
+            console.error("검색 실패:", err);
+        }
     };
 
     const clearState = () => {
