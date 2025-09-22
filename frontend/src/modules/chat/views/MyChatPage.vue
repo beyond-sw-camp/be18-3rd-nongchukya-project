@@ -64,7 +64,7 @@
 
       <aside class="drawer-panel" role="dialog" aria-modal="true">
         <header class="drawer-header">
-          <div class="drawer-title">채팅</div>
+          <div class="drawer-title">{{selectedRoomName}}</div>
           <button class="icon-btn" @click="closeDrawer">×</button>
         </header>
         <ChatRoom v-if="selectedRoomId" :key="selectedRoomId" :room-id="selectedRoomId" />
@@ -86,7 +86,8 @@ export default {
       friendRooms: [],
       groupRooms: [],
       drawerOpen: false,
-      selectedRoomId: null
+      selectedRoomId: null,
+      selectedRoomName: "",
     };
   },
   async created() {
@@ -112,22 +113,40 @@ export default {
   },
   methods: {
     openDrawer(roomId) {
+      const chat = [...this.friendRooms, ...this.groupRooms].find(c => c.roomId === roomId);
       this.selectedRoomId = roomId;
+      this.selectedRoomName = chat ? chat.roomName : "채팅";
       this.drawerOpen = true;
       document.body.style.overflow = "hidden"; // 스크롤 잠금
     },
     closeDrawer() {
       this.drawerOpen = false;
       this.selectedRoomId = null; // 언마운트 → 소켓 정리
+      this.selectedRoomName = "";
       document.body.style.overflow = "";
     },
     onKeydown(e) {
       if (e.key === "Escape" && this.drawerOpen) this.closeDrawer();
     },
     async leaveChatRoom(roomId) {
-      await api.delete(`/api/v1/chatrooms/group/${roomId}/leave`);
-      this.groupRooms = this.groupRooms.filter(c => c.roomId !== roomId);
-      if (this.selectedRoomId === roomId) this.closeDrawer();
+      const ok = window.confirm("정말로 나가시겠습니까?\n나가면 매칭이 취소됩니다.");
+      if (!ok) return;
+      try {
+        await api.delete(`/api/v1/chatrooms/group/${roomId}/leave`);
+        this.groupRooms = this.groupRooms.filter(c => c.roomId !== roomId);
+        if (this.selectedRoomId === roomId) this.closeDrawer();
+      } catch (error) {
+        const {status, message} = error.response.data;
+
+        if(status === 'USER_NOT_FOUND'){
+          alert(message);
+        }else if(status === 'CHATROOM_NOT_GROUP'){
+          alert(message);
+        }else if(status === 'COMPLETED_MATCH_NOT_FOUND') {
+          alert(message);
+        }
+      }
+      
     },
   },
 };

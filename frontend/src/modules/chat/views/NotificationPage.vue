@@ -85,17 +85,40 @@ export default {
       const notif = useNotificationStore();
       await notif.markAllRead();
     },
-    openChat(n) {
+    async openChat(n) {
       if (!n.chatRoomId) return
-      // 쿼리로 방 번호 전달 → MyChatPage에서 openDrawer(roomId) 자동 실행
-      this.$router.push({ path: '/chatrooms/list', query: { roomId: n.chatRoomId } })
+      try {
+        await api.get(`/api/v1/chatrooms/${n.chatRoomId}/exists`);
+        // 쿼리로 방 번호 전달 → MyChatPage에서 openDrawer(roomId) 자동 실행
+        this.$router.push({ path: '/chatrooms/list', query: { roomId: n.chatRoomId } })
+      } catch (error) {
+        const {status, message} = error.response.data;
+
+        if(status === 'USER_NOT_FOUND'){
+          alert(message);
+          await this.deleteNotification(n.notificationId);
+        }else if(status === 'CHATROOM_NOT_FOUND'){
+          alert(message);
+          await this.deleteNotification(n.notificationId);
+        }else if(status === 'NOT_CHAT_MEMBER') {
+          alert(message);
+          await this.deleteNotification(n.notificationId);
+        }
+      }
+      
     },
     async deleteNotification(notificationId) {
       try {
         await api.delete(`/api/v1/notifications/${notificationId}`);
         this.notifications = this.notifications.filter(n => n.notificationId !== notificationId)
-      } catch (e){
-        console.error("알림 삭제 실패", e)
+      } catch (error){
+        const {status, message} = error.response.data;
+
+        if(status === 'NOTIFICATION_NOT_FOUND'){
+          alert(message);
+        }else if(status === 'FORBIDDEN_NOTIFICATION_DELETE'){
+          alert(message);
+        }
       }
     }
   },
