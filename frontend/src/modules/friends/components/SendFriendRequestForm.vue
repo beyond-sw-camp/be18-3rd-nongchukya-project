@@ -46,7 +46,7 @@
     import { ref, computed, onMounted, watch } from "vue";
     import { useUsersStore } from "../stores/usersStore";
     import { useFriendRequestsStore } from "../stores/friendRequestsStore";
-    import defaultProfileImage from "@/assets/defaultProfileImage.png"
+    import defaultProfileImage from "@/assets/default_profile.png"
 
     const usersStore = useUsersStore();
     const friendRequestsStore = useFriendRequestsStore();
