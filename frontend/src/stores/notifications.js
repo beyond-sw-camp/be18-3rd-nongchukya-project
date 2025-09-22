@@ -98,8 +98,9 @@ export const useNotificationStore = defineStore('notifications', {
 
     resetState() {
       this.disconnectSSE()
-      this._setCount(0)
+      // this._setCount(0)
       // bootstrapped은 false로 유지 → 다음 init에서 정상 플로우
+      localStorage.removeItem('notif:lastCount')
     },
 
     /** 모든 알림 읽음 처리(있으면 사용) */
