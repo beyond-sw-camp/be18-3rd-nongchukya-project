@@ -5,7 +5,7 @@
       <h1>Forgot Password?</h1>
       <p>이메일 인증이 완료되면<br>새로운 비밀번호를 입력하실 수 있습니다.</p>
 
-       <form class="forgot-form" @submit.prevent="verifyCode">
+      <form class="forgot-form" @submit.prevent="verifyCode">
         <!-- 이메일 + 인증요청 버튼 -->
         <div class="input-group">
           <label for="forgot-email">이메일</label>
@@ -21,7 +21,8 @@
           </div>
         </div>
 
-        <div class="input-group">
+        <!-- 인증번호 -->
+        <div class="input-group" v-if="verificationSent">
           <label for="forgot-code">인증번호</label>
           <input
             id="forgot-code"
@@ -43,26 +44,48 @@
 <script setup>
 import { ref } from "vue"
 import { useRouter } from "vue-router"
+import api from "@/api/axios"
 
 const email = ref("")
 const code = ref("")
 const message = ref("")
+const verificationSent = ref(false)
 const router = useRouter()
 
-function sendCode() {
+// 이메일 인증 요청
+async function sendCode() {
   if (!email.value) {
     alert("이메일을 입력하세요.")
     return
   }
-  message.value = "인증번호가 이메일로 전송되었습니다 (테스트: 1234)."
+  try {
+    await api.post("/api/v1/auth/send-email-code", { email: email.value })
+    verificationSent.value = true
+    message.value = `인증번호가 ${email.value}로 전송되었습니다.`
+  } catch (err) {
+    console.error("❌ 인증 메일 전송 실패:", err)
+    alert("이메일 인증 요청 실패: " + (err.response?.data?.message || err.message))
+  }
 }
 
-function verifyCode() {
-  if (code.value === "1234") {
-    message.value = "인증 성공!"
-    router.push({ name: "ResetPassword" })
-  } else {
-    alert("인증번호가 올바르지 않습니다.")
+// 인증번호 확인
+async function verifyCode() {
+  try {
+    const res = await api.post("/api/v1/auth/verify-email-code", {
+      email: email.value,
+      code: code.value
+    })
+    if (res.data.success) {
+      message.value = "인증 성공!"
+      // ✅ 인증 성공 시 비밀번호 재설정 페이지로 이동
+      router.push({ name: "ResetPassword", query: { email: email.value } })
+    } else {
+      message.value = ""
+      alert("인증번호가 올바르지 않습니다.")
+    }
+  } catch (err) {
+    console.error("❌ 인증 실패:", err)
+    alert("인증 실패: " + (err.response?.data?.message || err.message))
   }
 }
 </script>
