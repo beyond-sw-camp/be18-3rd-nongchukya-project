@@ -2,7 +2,7 @@
     <div class="friends-container">
         <header class="header">
             <h1 class="title">친구 목록</h1>
-            <p class="subtitle">{{ friend.length }}명의 친구</p>
+            <p class="subtitle">{{ friendsStore.friend_list.length }}명의 친구</p>
     </header>
 
     <!-- 검색창 -->
@@ -66,7 +66,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
-import defaultProfileImage from "@/assets/defaultProfileImage.png"
+import defaultProfileImage from "@/assets/default_profile.png"
 import { useFriendsStore } from "../stores/friendsStore";
 import api from "@/api/axios";
 import { useRouter } from "vue-router";
@@ -81,13 +81,13 @@ onMounted(async () => {
 });
 
 // store 데이터 참조
-const friend = computed(() => friendsStore.friend_list);
+const friends = computed(() => friendsStore.friend_list);
 
 // 검색 필터
 const filteredFriends = computed(() => {
-    if (!searchQuery.value.trim()) return friend.value;
-        return friend.value.filter(friend =>
-    friend.nickname.includes(searchQuery.value.trim())
+    if (!searchQuery.value.trim()) return friends.value;
+        return friends.value.filter(f =>
+    f.nickname.includes(searchQuery.value.trim())
     );
 });
 
@@ -115,7 +115,7 @@ const deleteFriend = async (userId) => {
 };
 
 // 1:1 채팅
- async function startChat(otherNickname){
+async function startChat(otherNickname){
     try {
         const {data} = await api.post(`/api/v1/chatrooms/private/create`, null, { params: {otherNickname}});
 
