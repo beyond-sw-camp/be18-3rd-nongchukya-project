@@ -4,10 +4,13 @@ import Signup from '@/modules/auth/views/Signup.vue'
 import ForgotPassword from '@/modules/auth/views/ForgotPassword.vue'
 import ResetPassword from '@/modules/auth/views/ResetPassword.vue'
 // Community
-import PostList from '@/modules/community/views/PostList.vue'
+import Posts from '@/modules/community/views/Posts.vue'
+import PostDetail from '@/modules/community/views/PostDetail.vue'
+import UpdatePost from '@/modules/community/views/UpdatePost.vue'
+import CreatePost from '@/modules/community/views/CreatePost.vue'
 
 import Home from '@/views/Home.vue'  
-import HelloTest from '@/views/HelloTest.vue'
+
 
 const routes = [
   // Auth
@@ -18,17 +21,34 @@ const routes = [
 
   // Community
   {
-    name:'post-list',
-    path:'/community/post-list',
-    component:PostList,
-    children: [
-
-    ]
+    name:'posts',
+    path:'/community/posts',
+    component:Posts
+  },
+    // 상세
+  {
+    path: '/community/posts/:postId',
+    name: 'post-detail',
+    component: PostDetail,
+    props: true
+  },
+  // 수정
+  {
+    path: '/community/posts/:postId/update',
+    name: 'update-post',
+    component: UpdatePost,
+    props: true 
+  },
+  // 등록
+  {
+    path: '/community/posts/create',
+    name: 'create-post',
+    component: CreatePost,
+    props: true 
   },
 
   // Home
-  { path: '/', name: 'Home', component: Home }, 
-  {path: "/test", component: HelloTest}
+  { path: '/', name: 'Home', component: Home }
 ]
 
 const router = createRouter({

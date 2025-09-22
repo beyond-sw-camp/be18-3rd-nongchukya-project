@@ -29,7 +29,7 @@
         <div class="tab dropdown-parent">
           <router-link to="/" class="tab-link">Community</router-link>
           <div class="dropdown">
-            <router-link :to="{name: 'post-list'}">게시판</router-link>
+            <router-link :to="{name: 'posts'}">게시판</router-link>
             <router-link to="/">친구</router-link>
           </div>
         </div>
