@@ -39,7 +39,7 @@
       <div class="nav-right">
         <router-link v-if="isLogin" to="/notification" class="icon-btn" title="알림">
           <i class="mdi mdi-bell-outline"></i>
-          <span v-if="badgeCount > 0" class="badge">{{ badgeCount }}</span>
+          <span v-if="bootstrapped " class="badge">{{ unreadCount }}</span>
         </router-link>
 
         <router-link v-if="isLogin" to="/chatrooms/list" class="icon-btn" title="MYCHATPAGE">
@@ -63,80 +63,42 @@
   </header>
 </template>
 
-<script>
+<script setup>
 import api from "@/api/axios"
+import { useNotificationStore } from "@/stores/notifications"
+import { storeToRefs } from 'pinia'
+import { onMounted, ref } from 'vue'
+import { useRouter } from "vue-router"
 
-export default {
-  data() {
-    return {
-      isLogin: false,
-      badgeCount: 0,
-      es: null,
-    }
-  },
-  created() {
-    const token = localStorage.getItem("accessToken")
-    if (token) {
-      this.isLogin = true
-      this.bootstrapBadge()
-      this.connectSSE()
-    }
-  },
-  methods: {
-    async bootstrapBadge() {
-      try {
-        const { data } = await api.get("/api/v1/notifications/unread-count")
-        this.badgeCount = data?.count ?? 0
-      } catch {
-        /* 에러 무시 */
+const router = useRouter()
+const notif = useNotificationStore();
+const { unreadCount, bootstrapped } = storeToRefs(notif);
+
+const isLogin = ref(false);
+
+    onMounted(() => {
+      const token = localStorage.getItem("accessToken");
+      if(token) {
+        isLogin.value = true;
       }
-    },
-    connectSSE() {
-      const token = localStorage.getItem("accessToken")
-      this.es = new EventSource(
-        `http://localhost:8080/api/v1/sse/notifications?token=${encodeURIComponent(
-          token || ""
-        )}`
-      )
-      this.es.addEventListener("match-confirmed", (e) => {
-        this.badgeCount += 1
-        window.dispatchEvent(
-          new CustomEvent("notifications:new", { detail: JSON.parse(e.data) })
-        )
-      })
-      this.es.addEventListener("match-cancelled", (e) => {
-        this.badgeCount += 1
-        window.dispatchEvent(
-          new CustomEvent("notifications:new", { detail: JSON.parse(e.data) })
-        )
-      })
-      window.addEventListener("notifications:reset-badge", this.resetBadge)
-    },
-    resetBadge() {
-      this.badgeCount = 0
-    },
-    beforeUnmount() {
-      if (this.es) this.es.close()
-      window.removeEventListener("notifications:reset-badge", this.resetBadge)
-    },
-    async doLogout() {
-  try {
-    await api.post("/api/v1/auth/logout") // 쿠키도 서버에서 만료됨
+    });
+    async function doLogout() {
+      try {
+        await api.post("/api/v1/auth/logout") // 쿠키도 서버에서 만료됨
 
-    localStorage.removeItem("accessToken") // accessToken만 제거
+        localStorage.removeItem("accessToken") // accessToken만 제거
+        useNotificationStore().resetState()
 
-    this.isLogin = false
-    this.badgeCount = 0
+        isLogin.value = false
 
-    alert("로그아웃 되었습니다.")
-    this.$router.push("/login")
-  } catch (err) {
-    console.error("❌ 로그아웃 실패:", err.response?.data || err.message)
-    alert("로그아웃 실패: " + (err.response?.data?.message || err.message))
-  }
-},
-  },
-}
+        alert("로그아웃 되었습니다.")
+        router.push('/');
+      } catch (err) {
+        console.error("❌ 로그아웃 실패:", err.response?.data || err.message)
+        alert("로그아웃 실패: " + (err.response?.data?.message || err.message))
+      }
+    }
+
 </script>
 
 

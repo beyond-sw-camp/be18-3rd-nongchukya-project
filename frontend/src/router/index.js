@@ -10,6 +10,8 @@ import UpdatePost from '@/modules/community/views/UpdatePost.vue'
 import CreatePost from '@/modules/community/views/CreatePost.vue'
 
 import Home from '@/views/Home.vue'  
+import NotificationPage from '@/modules/chat/views/NotificationPage.vue'
+import MyChatPage from '@/modules/chat/views/MyChatPage.vue'
 
 
 const routes = [
@@ -32,14 +34,14 @@ const routes = [
     component: PostDetail,
     props: true
   },
-  // 수정
+    // 수정
   {
     path: '/community/posts/:postId/update',
     name: 'update-post',
     component: UpdatePost,
     props: true 
   },
-  // 등록
+    // 등록
   {
     path: '/community/posts/create',
     name: 'create-post',
@@ -49,6 +51,9 @@ const routes = [
 
   // Home
   { path: '/', name: 'Home', component: Home }
+  { path: '/', name: 'Home', component: Home },
+  { path: '/notification', name: 'NotificationPage', component: NotificationPage},
+  { path: '/chatrooms/list', name: 'MyChatPage', component: MyChatPage}
 ]
 
 const router = createRouter({
