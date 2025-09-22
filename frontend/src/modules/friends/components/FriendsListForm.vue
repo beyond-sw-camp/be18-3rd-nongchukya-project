@@ -41,7 +41,7 @@
 
             <button
                 class="btn-with-img"
-                @click="startChat(friend)"
+                @click="startChat(friend.nickname)"
                 title="1:1 채팅"
             >
                 <img src="@/assets/chatIcon.png" alt="채팅"/>
@@ -68,11 +68,12 @@
 import { ref, computed, onMounted } from "vue";
 import defaultProfileImage from "@/assets/defaultProfileImage.png"
 import { useFriendsStore } from "../stores/friendsStore";
-// import { useRouter } from "vue-router";
+import api from "@/api/axios";
+import { useRouter } from "vue-router";
 
 const friendsStore = useFriendsStore();
 const searchQuery = ref("");
-// const router = useRouter();
+const router = useRouter();
 
 // 스토어에서 친구 데이터 가져오기
 onMounted(async () => {
@@ -114,9 +115,22 @@ const deleteFriend = async (userId) => {
 };
 
 // 1:1 채팅
-const startChat = (friend) => {
-    console.log("채팅 시작:", friend);
-  // TODO: 라우터 연결 or 채팅방 생성 로직
+ async function startChat(otherNickname){
+    try {
+        const {data} = await api.post(`/api/v1/chatrooms/private/create`, null, { params: {otherNickname}});
+
+        const roomId = data?.items?.[0];
+        if(!roomId) throw new Error('roomId가 없습니다.');
+        router.push({ path: '/chatrooms/list', query: { roomId } });
+    } catch (error) {
+        const res = error.response?.data;
+        if (res?.status === 'USER_NOT_FOUND') {
+        alert(res.message);
+        } else {
+        console.error("채팅방 생성 실패:", error);
+        alert("채팅방을 생성할 수 없습니다.");
+        }
+    }
 };
 </script>
 

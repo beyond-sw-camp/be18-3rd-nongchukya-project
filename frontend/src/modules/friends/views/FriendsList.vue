@@ -7,7 +7,7 @@
 
 <script setup>
     import { onMounted } from 'vue';
-    import FriendsListForm from '../components/friendsListForm.vue';
+    import FriendsListForm from '../components/FriendsListForm.vue';
     import { useFriendsStore } from '../stores/friendsStore';
 
     const friensStore = useFriendsStore();
