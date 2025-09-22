@@ -55,9 +55,18 @@
             </div>
           </div>
         </li>
+        <li v-if="!last" ref="sentinel" class="sentinel">
+          <div v-if="loading" class="loading">불러오는 중…</div>
+        </li>
       </ul>
+
+        <!-- 폴백: 더 보기 버튼 (옵셔널) -->
+        <div v-if="!last" class="load-more">
+          <button class="btn" :disabled="loading" @click="loadNext">
+            {{ loading ? '불러오는 중…' : '더 보기' }}
+          </button>
+        </div>{{ errorMsg }}</div>
     </div>
-  </div>
 </template>
 
 <script>
@@ -66,7 +75,17 @@ import { useNotificationStore } from '@/stores/notifications'
 
 export default {
   name: 'NotificationPage',
-  data(){ return { notifications: [] } },
+  data(){ 
+    return { 
+      notifications: [],
+      page: 0,
+      size: 5,
+      totalCount: 0,
+      loading: false,
+      last: false,
+      errorMsg: '',
+      io:null
+    } },
   methods: {
     formatTime(iso) {
       if (!iso) return ''
@@ -77,10 +96,62 @@ export default {
         hour: '2-digit', minute: '2-digit', hour12: false
       })
     },
-    async loadList(){
-      const { data } = await api.get(`/api/v1/notifications`)
-      this.notifications = data.items || []
+    // async loadList(){
+    //   const { data } = await api.get(`/api/v1/notifications`)
+    //   this.notifications = data.items || []
+    // },
+    async loadNext(){
+      if(this.loading || this.last) return
+      this.loading = true
+      this.errorMsg = ''
+      try {
+        const { data } = await api.get(`/api/v1/notifications`, {
+          params: {page: this.page, size: this.size, sort: 'createdAt,DESC'}
+        })
+        const items = data.items ?? []
+        if(typeof data?.totalCount === 'number') {
+          this.totalCount = data.totalCount
+        }
+        const seen = new Set(this.notifications.map(n=> n.notificationId))
+        for(const it of items) {
+          if (!seen.has(it.notificationId)) {
+           this.notifications.push(it)
+           seen.add(it.notificationId)
+         }
+        }
+        const nextPage = this.page + 1
+        if (typeof this.totalCount === 'number' && this.totalCount > 0) {
+         this.last = (nextPage * this.size) >= this.totalCount
+       } else {
+         // 백엔드 totalCount 없을 때의 안전장치
+         this.last = items.length < this.size
+       }
+        this.page = nextPage
+      } catch (error) {
+        console.error('알림 페이지 로딩 실패:', error)
+       this.errorMsg = error?.response?.data?.message || error.message || '로딩 실패'
+      } finally {
+        this.loading = false
+      }
     },
+    setupInfiniteScroll(){
+     const target = this.$refs.sentinel
+     if (!target || this.io) return
+     if (!('IntersectionObserver' in window)) return
+    this.io = new IntersectionObserver((entries) => {
+       entries.forEach(entry => {
+         if (entry.isIntersecting) this.loadNext()
+       })
+     }, { root: null, rootMargin: '200px 0px', threshold: 0 })
+     this.io.observe(target)
+   },
+
+   teardownInfiniteScroll(){
+     if (this.io) {
+       this.io.disconnect()
+       this.io = null
+     }
+   },
     async markAllRead(){
       const notif = useNotificationStore();
       await notif.markAllRead();
@@ -123,9 +194,15 @@ export default {
     }
   },
   async mounted(){
-    await this.loadList()
-    await this.markAllRead()   // ✅ 페이지 들어오면 즉시 전체 읽음
-  }
+    // await this.loadList()
+    // await this.markAllRead()   // ✅ 페이지 들어오면 즉시 전체 읽음
+    await this.loadNext()      // 첫 페이지 로드
+    this.setupInfiniteScroll() // 무한스크롤 시작
+    await this.markAllRead()   // 정책: 페이지 입장 시 전체 읽음
+  },
+  beforeUnmount(){
+   this.teardownInfiniteScroll()
+ }
 }
 </script>
 
@@ -218,4 +295,8 @@ export default {
 }
 .unread{ background:#f8fbff; }
 .empty{ color:#6b7280; padding:16px; }
+ .sentinel { list-style:none; padding:12px; text-align:center; }
+ .loading { color:#6b7280; font-size:14px; }
+ .load-more { display:flex; gap:12px; align-items:center; justify-content:center; margin-top:12px; }
+ .error { color:#ef4444; font-size:13px; }
 </style>
