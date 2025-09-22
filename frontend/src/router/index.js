@@ -13,8 +13,7 @@ import Home from '@/views/Home.vue'
 import NotificationPage from '@/modules/chat/views/NotificationPage.vue'
 import MyChatPage from '@/modules/chat/views/MyChatPage.vue'
 import FriendsList from '@/modules/friends/views/FriendsList.vue'
-
-
+import Mypage from '@/modules/mypage/views/Mypage.vue'
 const routes = [
   // Auth
   { path: '/login', name: 'Login', component: Login, meta: { hideHeader: true } },
@@ -54,7 +53,12 @@ const routes = [
   { path: '/', name: 'Home', component: Home },
   { path: '/notification', name: 'NotificationPage', component: NotificationPage},
   { path: '/chatrooms/list', name: 'MyChatPage', component: MyChatPage},
-  { path: '/friends/list', name: 'FriendsList', component: FriendsList }
+
+  { path: '/friends/list', name: 'FriendsList', component: FriendsList },
+
+
+  { path: '/mypage', name: 'Mypage', component: Mypage }
+]
 
 
 const router = createRouter({
