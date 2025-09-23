@@ -52,7 +52,7 @@
 
                 <button
                     type="button" class="btn-close" aria-label="Close"
-                    @click="deleteFriend(friend.userId)"
+                    @click="deleteChat(friend.nickname); deleteFriend(friend.userId);"
                     title="친구 삭제"
                 >
                 </button>
@@ -136,6 +136,28 @@ async function startChat(otherNickname){
         }
     }
 };
+
+// 채팅방 삭제
+async function deleteChat(otherNickname){
+    try {
+        const {data} = await api.post(`/api/v1/chatrooms/private/create`, null, { params: {otherNickname}});
+        const roomId = data?.items?.[0];
+        if(!roomId) throw new Error('roomId가 없습니다.');
+
+        const result = await api.delete(`/api/v1/chatrooms/private/${roomId}/leave`);
+
+        console.log('성공!');
+        return result.data;
+    } catch (error) {
+        const res = error.response?.data;
+        if (res?.status === 'USER_NOT_FOUND') {
+        alert(res.message);
+        } else {
+        console.error("채팅방 삭제 실패:", error);
+        alert("채팅방을 삭제할 수 없습니다.");
+        }
+    }
+}
 </script>
 
 <style scoped>

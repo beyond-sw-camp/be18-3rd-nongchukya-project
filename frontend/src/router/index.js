@@ -9,6 +9,7 @@ import MatchApplications from '@/modules/match/views/MatchApplications.vue'
 import AddMatchApplication from '@/modules/match/views/AddMatchApplication.vue'
 import Matches from '@/modules/match/views/Matches.vue'
 import CompletedMatches from '@/modules/match/views/CompletedMatches.vue'
+import AddMatchResult from '@/modules/match/views/AddMatchResult.vue'
 
 // Community
 import Posts from '@/modules/community/views/Posts.vue'
@@ -24,7 +25,9 @@ import FriendsList from '@/modules/friends/views/FriendsList.vue'
 import FriendRequestsList from '@/modules/friends/views/FriendRequestsList.vue'
 import SendFriendRequest from '@/modules/friends/views/SendFriendRequest.vue'
 import Mypage from '@/modules/mypage/views/Mypage.vue'
-import AddMatchResult from '@/modules/match/views/AddMatchResult.vue'
+
+// Kakao OAuth
+import KakaoCallback from '@/modules/auth/views/KakaoCallback.vue'
 
 const routes = [
   // Auth
@@ -80,8 +83,16 @@ const routes = [
     { path: 'requests/send', name: 'SendFriendRequest', component: SendFriendRequest }
   ]},
   // MyPage
-  { path: '/mypage', name: 'Mypage', component: Mypage }
+  { path: '/mypage', name: 'Mypage', component: Mypage },
 
+
+  // Kakao OAuth
+  { 
+    path: '/oauth/callback', 
+    name: 'KakaoCallback', 
+    component: KakaoCallback, 
+    meta: { hideHeader: true } 
+  }
 ]
 
 
