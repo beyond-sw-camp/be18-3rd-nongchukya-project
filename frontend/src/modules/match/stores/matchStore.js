@@ -49,19 +49,21 @@ export const useMatchStore = defineStore('match', () => {
 
   const fetchMatchResults = async () => {
     try {
-      const response = await api.get('/api/v1/match-service/match-results');
+      const response = await api.get('/api/v1/match-service/match-results');  
 
-      console.log(response);
-      
-
-      matchResults.value = response.data;
-      return response.data;
+      matchResults.value = response.data.items;
     } catch (error) {
       console.error('경기 결과 불러오기 실패:', error);
       matchResults.value = null;
     }
   };
 
+  const addMatchResult = async (matchId, matchResult) => {
+    const response = await api.post(`/api/v1/match-service/completed-matches/${matchId}/match-results`, matchResult);
+
+    return response.data;
+  };
+
   return { matches, completedMatches, imminentMatches, dailyMatches, matchResults, pageInfo, 
-    fetchMatches, fetchCompletedMatches, fetchImminentMatches, fetchDailyMatches, fetchMatchResults };
+    fetchMatches, fetchCompletedMatches, fetchImminentMatches, fetchDailyMatches, fetchMatchResults, addMatchResult };
 });

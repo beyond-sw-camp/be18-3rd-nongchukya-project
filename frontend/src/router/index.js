@@ -24,6 +24,8 @@ import FriendsList from '@/modules/friends/views/FriendsList.vue'
 import FriendRequestsList from '@/modules/friends/views/FriendRequestsList.vue'
 import SendFriendRequest from '@/modules/friends/views/SendFriendRequest.vue'
 import Mypage from '@/modules/mypage/views/Mypage.vue'
+import AddMatchResult from '@/modules/match/views/AddMatchResult.vue'
+
 const routes = [
   // Auth
   { path: '/login', name: 'Login', component: Login, meta: { hideHeader: true } },
@@ -36,6 +38,7 @@ const routes = [
   { path: '/matchApplications', name: 'matchApplications', component: MatchApplications },
   { path: '/matches', name: 'matches', component: Matches },
   { path: '/completedMatches', name: 'completedMatches', component: CompletedMatches},
+  { path: '/:matchId/match-results/add', name: 'addMatchResult', component: AddMatchResult },
 
   // Community
   {
