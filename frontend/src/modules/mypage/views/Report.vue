@@ -16,7 +16,6 @@
                 <option>욕설/비속어 사용</option>
                 <option>폭력/위협적 행동</option>
                 <option>사기/금전 요구</option>
-                <option>부적절한 콘텐츠</option>
                 <option>스팸/광고</option>
                 <option>비매너/불친절</option>
                 <option>기타</option>

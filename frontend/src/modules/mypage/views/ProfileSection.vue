@@ -14,7 +14,7 @@
       <input v-model="editableData.email" placeholder="이메일" />
       <input v-model="editableData.phone" placeholder="전화번호" />
       <input v-model="editableData.address" placeholder="주소" />
-      <input v-model="editableData.age" placeholder="나이" />
+      <input v-model="editableData.age" placeholder="나이" type="number" />
       <button @click="saveProfile">저장</button>
     </div>
 
@@ -27,12 +27,12 @@
       <p><strong>나이:</strong> {{ editableData.age || '-' }}</p>
 
       <!-- 관심 있는 운동만 표시 -->
-    <div class="profile-header">
-      <h3>선호 운동</h3>
-      <button class="edit-btn" @click="editLevelMode = !editLevelMode" name="level-btn">
-            {{ editLevelMode ? '취소' : '레벨 수정' }}
-      </button>
-    </div>
+      <div class="profile-header">
+        <h3>선호 운동</h3>
+        <button class="edit-btn" @click="editLevelMode = !editLevelMode">
+          {{ editLevelMode ? '취소' : '레벨 수정' }}
+        </button>
+      </div>
 
       <div class="favorite-sports">
         <ul>
@@ -54,8 +54,6 @@
             {{ level.name }}
           </option>
         </select>
-
-        
 
         <label class="checkbox-container">
           관심 있음
@@ -126,13 +124,36 @@ const interestedSports = computed(() => {
   return defaultSports.filter(sport => localUserLevels[sport]?.interest)
 })
 
-// 프로필 저장
-const saveProfile = () => {
-  emit('update', { ...editableData })
-  editProfileMode.value = false
+// 프로필 저장 (API 호출)
+const saveProfile = async () => {
+  try {
+    const token = localStorage.getItem('accessToken')
+    const res = await axios.put('http://localhost:8080/api/v1/mypage/profile', {
+      name: editableData.name,
+      email: editableData.email,
+      phoneNumber: editableData.phone,
+      address: editableData.address,
+      age: editableData.age
+    }, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+
+    editableData.name = res.data.name
+    editableData.email = res.data.email
+    editableData.phone = res.data.phoneNumber
+    editableData.address = res.data.address
+    editableData.age = res.data.age
+
+    emit('update', { ...res.data })
+    editProfileMode.value = false
+    alert('프로필이 업데이트되었습니다.')
+  } catch (err) {
+    console.error(err)
+    alert('프로필 업데이트 실패')
+  }
 }
 
-// 레벨 저장
+// 레벨 저장 (API 호출)
 const saveLevels = async () => {
   const token = localStorage.getItem('accessToken')
 
@@ -159,6 +180,7 @@ const saveLevels = async () => {
     }
   }
   editLevelMode.value = false
+  alert('레벨 정보가 업데이트되었습니다.')
 }
 </script>
 
@@ -167,7 +189,7 @@ const saveLevels = async () => {
 .profile-header {
   display: flex;
   justify-content: space-between;
-  align-items: center; /* 수직 중앙 정렬 */
+  align-items: center;
   margin-bottom: 1rem;
 }
 .profile-header h2,
@@ -176,26 +198,44 @@ const saveLevels = async () => {
   padding: 0;
   line-height: 1.2;
   font-weight: 600;
-  font-size: 1.25rem; /* 두 요소 같은 크기로 통일 */
+  font-size: 1.25rem;
 }
-button[name="level-btn"] {
-  position: relative; /* 위치 조정 가능하게 */
-  left: 20px; /* 오른쪽으로 10px 이동 */
-  /* 필요에 따라 top, margin 등도 사용 가능 */
+.edit-form input,
+.edit-form select {
+  display: block;
+  margin: 0.3rem 0;
+  padding: 0.4rem 0.6rem;
+  width: 100%;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
 }
-.edit-form input, .edit-form select { display: block; margin: 0.3rem 0; padding: 0.4rem 0.6rem; width: 100%; border-radius: 6px; border: 1px solid #d1d5db; }
-.edit-form button { margin-top: 0.5rem; padding: 0.4rem 0.8rem; background-color: #10b981; color: white; border: none; border-radius: 6px; cursor: pointer; }
-.edit-btn { padding: 0.3rem 0.8rem; background-color: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer; }
-
-.basic-info { background: #f9fafb; padding: 1rem; border-radius: 12px; font-size: 0.95rem; }
+.edit-form button {
+  margin-top: 0.5rem;
+  padding: 0.4rem 0.8rem;
+  background-color: #10b981;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.edit-btn {
+  padding: 0.3rem 0.8rem;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.basic-info {
+  background: #f9fafb;
+  padding: 1rem;
+  border-radius: 12px;
+  font-size: 0.95rem;
+}
 .basic-info p { margin: 0.25rem 0; }
 .basic-info strong { color: #3b82f6; }
 .favorite-sports h3 { margin-top: 1rem; margin-bottom: 1rem; font-weight: 600; }
 .favorite-sports ul { list-style: disc; padding-left: 1.2rem; }
-
-
-
-
 
 .checkbox-container {
   display: inline-block;
@@ -207,7 +247,6 @@ button[name="level-btn"] {
   user-select: none;
   color: #1e293b;
 }
-
 .checkbox-container input {
   position: absolute;
   opacity: 0;
@@ -215,8 +254,6 @@ button[name="level-btn"] {
   height: 0;
   width: 0;
 }
-
-/* 체크박스 모양 */
 .checkmark {
   position: absolute;
   top: 0;
@@ -228,26 +265,18 @@ button[name="level-btn"] {
   border: 1px solid #d1d5db;
   transition: all 0.2s ease;
 }
-
-/* 체크되었을 때 */
 .checkbox-container input:checked ~ .checkmark {
   background-color: #3b82f6;
   border-color: #3b82f6;
 }
-
-/* 체크 표시 */
 .checkmark:after {
   content: "";
   position: absolute;
   display: none;
 }
-
-/* 체크되면 표시 */
 .checkbox-container input:checked ~ .checkmark:after {
   display: block;
 }
-
-/* 체크 모양 (✔) */
 .checkbox-container .checkmark:after {
   left: 5px;
   top: 1px;
