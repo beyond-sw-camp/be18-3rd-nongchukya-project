@@ -18,7 +18,7 @@
     </div>
 
     <div class="social-login">
-      <button type="button" class="social-btn fancy-btn">
+      <button type="button" class="social-btn fancy-btn" @click="redirectToKakao">
         <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
           <rect class="border" width="100%" height="100%" />
         </svg>
@@ -68,6 +68,14 @@ const onSubmit = async () => {
     alert("로그인 실패: " + (err.response?.data?.message || err.message))
   }
 }
+
+const redirectToKakao = () => {
+  const clientId = "ce2fb7ac1fb573cfb323ede04caab4d5"; // 발급받은 REST API 키
+  const redirectUri = "http://localhost:5173/oauth/callback"; // 백엔드 콜백 URI
+  const kakaoUrl = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}`;
+
+  window.location.href = kakaoUrl;
+};
 </script>
 
 

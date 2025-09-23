@@ -24,6 +24,10 @@ import FriendsList from '@/modules/friends/views/FriendsList.vue'
 import FriendRequestsList from '@/modules/friends/views/FriendRequestsList.vue'
 import SendFriendRequest from '@/modules/friends/views/SendFriendRequest.vue'
 import Mypage from '@/modules/mypage/views/Mypage.vue'
+
+// Kakao OAuth
+import KakaoCallback from '@/modules/auth/views/KakaoCallback.vue'
+
 const routes = [
   // Auth
   { path: '/login', name: 'Login', component: Login, meta: { hideHeader: true } },
@@ -77,8 +81,16 @@ const routes = [
     { path: 'requests/send', name: 'SendFriendRequest', component: SendFriendRequest }
   ]},
   // MyPage
-  { path: '/mypage', name: 'Mypage', component: Mypage }
+  { path: '/mypage', name: 'Mypage', component: Mypage },
 
+
+  // Kakao OAuth
+  { 
+    path: '/oauth/callback', 
+    name: 'KakaoCallback', 
+    component: KakaoCallback, 
+    meta: { hideHeader: true } 
+  }
 ]
 
 
