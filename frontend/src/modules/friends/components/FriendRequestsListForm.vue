@@ -1,43 +1,47 @@
 <template>
-<div class="min-h-screen bg-gray-50 py-8">
-    <div class="max-w-4xl mx-auto px-4">
-        <h1 class="text-3xl font-bold text-gray-800 mb-8 text-center">친구 요청</h1>
+<div>
+    <div>
+        <h1 class="text-center">요청 목록</h1>
     </div>
 
         <!-- 탭 메뉴 -->
 <div>
-    <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
-        <input type="radio" class="btn-check" id="Received" value="received" v-model="activeTab">
-        <label class="btn btn-outline-primary" for="Received">받은 요청</label>
+    <div class="btn-group-container">
+        <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+            <input type="radio" class="btn-check" id="Received" value="received" v-model="activeTab">
+            <label class="btn btn-outline-primary" for="Received">받은 요청</label>
 
-        <input type="radio" class="btn-check" id="Sent" value="sent" v-model="activeTab">
-        <label class="btn btn-outline-primary" for="Sent">보낸 요청</label>
+            <input type="radio" class="btn-check" id="Sent" value="sent" v-model="activeTab">
+            <label class="btn btn-outline-primary" for="Sent">보낸 요청</label>
+        </div>
     </div>
 
-    <div v-if="activeTab === 'sent'" class="friends-grid mt-3">
-        <div
-            v-for="friendRequest in friendRequests"
-            :key="friendRequest.request_id"
-            class="friend-card"
-        >
-            <div class="profile-section">
-                <div class="profile-image-container">
-                    <img
-                        :src="friendRequest.profileImage || defaultProfileImage"
-                        :alt="`${friendRequest.nickname} 프로필`"
-                        class="profile-image"
-                    />
-                </div>
-        
-                <div class="friend-info">
-                    <h3 class="nickname">{{ friendRequest.nickname }}</h3>
-                    <p class="request-date">{{ formatFriendDate(friendRequest.createdAt) }}</p>
-                </div>
-                <div class="actions">
-                    <button type="button" class="btn btn-danger" 
-                        @click="deleteSentFriendRequests(friendRequest.userId)"
-                        title="요청 철회">취소</button>
+    <div v-if="activeTab === 'sent'" class="friends-container mt-3">
+        <div class="friends-grid">
+            <div
+                v-for="friendRequest in friendRequests"
+                :key="friendRequest.request_id"
+                class="friend-card"
+            >
+                <div class="profile-section">
+                    <div class="profile-image-container">
+                        <img
+                            :src="friendRequest.profileImage || defaultProfileImage"
+                            :alt="`${friendRequest.nickname} 프로필`"
+                            class="profile-image"
+                        />
+                    </div>
+            
+                    <div class="friend-info">
+                        <h3 class="nickname">{{ friendRequest.nickname }}</h3>
+                        <p class="request-date">{{ formatFriendDate(friendRequest.createdAt) }}</p>
+                    </div>
+                    <div class="actions">
+                        <button type="button" class="btn btn-danger" 
+                            @click="deleteSentFriendRequests(friendRequest.userId)"
+                            title="요청 철회">취소</button>
 
+                    </div>
                 </div>
             </div>
         </div>
@@ -45,33 +49,35 @@
 
 
     <!-- 받은 요청 목록 -->
-    <div v-else class="friends-grid mt-3">
-        <div
-            v-for="friendRequest in friendRequests"
-            :key="friendRequest.request_id"
-            class="friend-card"
-        >
-            <div class="profile-section">
-                <div class="profile-image-container">
-                    <img
-                        :src="friendRequest.profileImage || defaultProfileImage"
-                        :alt="`${friendRequest.nickname} 프로필`"
-                        class="profile-image"
-                    />
-                </div>
-        
-                <div class="friend-info">
-                    <h3 class="nickname">{{ friendRequest.nickname }}</h3>
-                    <p class="request-date">{{ formatFriendDate(friendRequest.createdAt) }}</p>
-                </div>
+    <div v-else class="friends-container mt-3">
+        <div class="friends-grid">
+            <div
+                v-for="friendRequest in friendRequests"
+                :key="friendRequest.request_id"
+                class="friend-card"
+            >
+                <div class="profile-section">
+                    <div class="profile-image-container">
+                        <img
+                            :src="friendRequest.profileImage || defaultProfileImage"
+                            :alt="`${friendRequest.nickname} 프로필`"
+                            class="profile-image"
+                        />
+                    </div>
+            
+                    <div class="friend-info">
+                        <h3 class="nickname">{{ friendRequest.nickname }}</h3>
+                        <p class="request-date">{{ formatFriendDate(friendRequest.createdAt) }}</p>
+                    </div>
 
-                <div class="actions">
-                    <button type="button" class="btn btn-primary"
-                        @click="acceptReceivedFriendRequests(friendRequest.userId)">수락</button>
-                    <button type="button" class="btn btn-danger"
-                        @click="deleteReceivedFriendRequests(friendRequest.userId)"
-                        title="요청 거절">거절</button>
+                    <div class="actions">
+                        <button type="button" class="btn btn-primary"
+                            @click="acceptReceivedFriendRequests(friendRequest.userId)">수락</button>
+                        <button type="button" class="btn btn-danger"
+                            @click="deleteReceivedFriendRequests(friendRequest.userId)"
+                            title="요청 거절">거절</button>
 
+                    </div>
                 </div>
             </div>
         </div>
@@ -143,33 +149,70 @@
 
 </script>
 
-<style lang="scss" scoped>
-.friends-grid {
-    display: grid;
-    gap: 1rem;
-}
-.friend-card {
-    position: relative;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #f9f9f9;
-    padding: 0.75rem;
-    border-radius: 8px;
-}
-.profile-section {
-    display: flex;
-    align-items: center;
-}
-.profile-image-container {
-    width: 50px;
-    height: 50px;
-    margin-right: 0.75rem;
-}
-.profile-image {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    object-fit: cover;
-}
+<style scoped>
+    .btn-group-container {
+        display: flex;
+        justify-content: center; /* 가로 가운데 정렬 */
+        margin-top: 1rem;        /* 위쪽 여백 */
+    }
+    .btn-group {
+        width: 450px;
+    }
+
+    .friends-container {
+        border: 2px solid;
+        border-radius: 16px;
+        width: 1000px;
+        max-height: 500px;
+        margin: 0 auto;
+        padding: 1.5rem;
+        overflow-y: auto;    /* 세로 스크롤 추가 */
+        overflow-x: hidden;
+    }
+
+    .friends-grid {
+        display: grid;
+        gap: 1rem;
+    }
+    .friend-card {
+        position: relative;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #f9f9f9;
+        padding: 0.75rem;
+        border-radius: 8px;
+    }
+    .profile-section {
+        display: flex;
+        align-items: center;
+    }
+    .profile-image-container {
+        width: 50px;
+        height: 50px;
+        margin-right: 0.75rem;
+    }
+    .profile-image {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+    .friend-info {
+        margin-left: 70px;
+    }
+
+    .btn-primary {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        right: 80px;
+    }
+
+    .btn-danger {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        right: 10px;
+    }
 </style>

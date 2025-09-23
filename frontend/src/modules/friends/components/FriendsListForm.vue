@@ -1,65 +1,69 @@
 <template>
-    <div class="friends-container">
-        <header class="header">
-            <h1 class="title">친구 목록</h1>
-            <p class="subtitle">{{ friendsStore.friend_list.length }}명의 친구</p>
-    </header>
+    <div class="app-background">
+            <header class="header">
+                <h1 class="title">친구 목록</h1>
+                
+            </header>
+        <div class="friends-container">
 
-    <!-- 검색창 -->
-    <div class="search-container">
-        <input
-            v-model="searchQuery"
-            type="text"
-            placeholder="친구 검색..."
-            class="search-input"
-        />
-    </div>
 
-    <!-- 친구 카드 -->
-    <div class="friends-grid">
-        <div
-            v-for="friend in filteredFriends"
-            :key="friend.friend_id"
-            class="friend-card"
-        >
-            <div class="profile-section">
-                <div class="profile-image-container">
-                    <img
-                        :src="friend.profileImage || defaultProfileImage"
-                        :alt="`${friend.nickname} 프로필`"
-                        class="profile-image"
-                    />
-                </div>
-        
-                <div class="friend-info">
-                    <h3 class="nickname">{{ friend.nickname }}</h3>
-                    <p class="friend-date">{{ formatFriendDate(friend.createdAt) }}</p>
-                </div>
-            </div>
+        <!-- 검색창 -->
+        <div class="search-container">
+            <input
+                v-model="searchQuery"
+                type="text"
+                placeholder="친구 검색..."
+                class="search-input"
+            />
+        </div>
 
-        <div class="actions">
-
-            <button
-                class="btn-with-img"
-                @click="startChat(friend.nickname)"
-                title="1:1 채팅"
+            <!-- 친구 카드 -->
+        <p class="subtitle">{{ friendsStore.friend_list.length }}명의 친구</p>
+        <div class="friends-grid">
+            <div
+                v-for="friend in filteredFriends"
+                :key="friend.friend_id"
+                class="friend-card"
             >
-                <img src="@/assets/chatIcon.png" alt="채팅"/>
-            </button>
+                <div class="profile-section">
+                    <div class="profile-image-container">
+                        <img
+                            :src="friend.profileImage || defaultProfileImage"
+                            :alt="`${friend.nickname} 프로필`"
+                            class="profile-image"
+                        />
+                    </div>
+                
+                    <div class="friend-info">
+                        <h3 class="nickname">{{ friend.nickname }}</h3>
+                        <p class="friend-date">{{ formatFriendDate(friend.createdAt) }}</p>
+                    </div>
+                </div>
 
-            <button
-                type="button" class="btn-close" aria-label="Close"
-                @click="deleteFriend(friend.userId)"
-                title="친구 삭제"
-            >
-            </button>
+            <div class="actions">
+
+                <button
+                    class="btn-with-img"
+                    @click="startChat(friend.nickname)"
+                    title="1:1 채팅"
+                >
+                    <img src="@/assets/chatIcon.png" alt="채팅"/>
+                </button>
+
+                <button
+                    type="button" class="btn-close" aria-label="Close"
+                    @click="deleteFriend(friend.userId)"
+                    title="친구 삭제"
+                >
+                </button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- 검색 결과 없음 -->
-        <div v-if="filteredFriends.length === 0" class="empty-state">
-            <p>검색 결과가 없습니다.</p>
+        <!-- 검색 결과 없음 -->
+            <div v-if="filteredFriends.length === 0" class="empty-state">
+                <p>검색 결과가 없습니다.</p>
+            </div>
         </div>
     </div>
 </template>
@@ -136,19 +140,35 @@ async function startChat(otherNickname){
 
 <style scoped>
 /* 간단한 스타일 (예시) */
+
 .friends-container {
-    max-width: 600px;
+    background: linear-gradient(to bottom, #ffe6cf, #f9f9f9);;
+    border-radius: 16px;
+    width: 1000px;
+    max-height: 500px;
+    border: 2px solid;
     margin: 0 auto;
-    padding: 1rem;
+    padding: 1.5rem;
+    overflow-y: auto;    /* 세로 스크롤 추가 */
+    overflow-x: hidden;
 }
+
+.friends-container::-webkit-scrollbar {
+    width: 1px;    /* ✅ 스크롤바 두께 */
+}
+
 .header {
     text-align: center;
     margin-bottom: 1rem;
 }
 .search-container {
+    border: 2px solid;
+    border-radius: 16px;
     margin-bottom: 1rem;
 }
 .search-input {
+    border-radius: 16px;
+    background-color: #f9f9f9;
     width: 100%;
     padding: 0.5rem;
 }

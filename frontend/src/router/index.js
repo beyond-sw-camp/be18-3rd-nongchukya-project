@@ -19,6 +19,7 @@ import CreatePost from '@/modules/community/views/CreatePost.vue'
 import Home from '@/views/Home.vue'  
 import NotificationPage from '@/modules/chat/views/NotificationPage.vue'
 import MyChatPage from '@/modules/chat/views/MyChatPage.vue'
+import FriendLayout from '@/modules/friends/layout/FriendLayout.vue'
 import FriendsList from '@/modules/friends/views/FriendsList.vue'
 import FriendRequestsList from '@/modules/friends/views/FriendRequestsList.vue'
 import SendFriendRequest from '@/modules/friends/views/SendFriendRequest.vue'
@@ -70,10 +71,11 @@ const routes = [
   { path: '/chatrooms/list', name: 'MyChatPage', component: MyChatPage},
 
   // Friends
-  { path: '/friends/list', name: 'FriendsList', component: FriendsList },
-  { path: '/friends/requests', name: 'FriendRequestsList', component: FriendRequestsList },
-  { path: '/friends/requests/send', name: 'SendFriendRequest', component: SendFriendRequest },
-
+  { path: '/friends', component: FriendLayout, children: [
+    { path: 'list', name: 'FriendsList', component: FriendsList },
+    { path: 'requests', name: 'FriendRequestsList', component: FriendRequestsList },
+    { path: 'requests/send', name: 'SendFriendRequest', component: SendFriendRequest }
+  ]},
   // MyPage
   { path: '/mypage', name: 'Mypage', component: Mypage }
 
