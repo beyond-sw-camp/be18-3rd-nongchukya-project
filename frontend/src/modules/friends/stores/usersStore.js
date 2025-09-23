@@ -10,5 +10,10 @@ export const useUsersStore = defineStore('user', () => {
         console.log(response);
         users.value = response.data.items;
     };
-    return {users, getSearchUsersByNickname}
+
+    const clearUsers = () => {
+    users.value = []; // ✅ store를 초기화
+    };
+
+    return { users, getSearchUsersByNickname, clearUsers }
 });
