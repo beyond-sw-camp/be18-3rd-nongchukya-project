@@ -11,19 +11,19 @@
 
       <!-- 가운데: 탭 -->
       <div class="nav-center">
+        
         <!-- Match 탭 -->
+        <router-link :to="{name: 'matchApplication/add'}" class="tab">Match</router-link>
+
+        <!-- Match List 탭 -->
         <div class="tab dropdown-parent">
           <router-link to="/" class="tab-link">Match</router-link>
           <div class="dropdown">
-            <router-link :to="{name: 'matchApplication/add'}">매칭 신청</router-link>
             <router-link :to="{name: 'matches'}">매칭 중 조회</router-link>
-            <router-link :to="{name: 'completedMatches'}">매칭 결과 조회</router-link>
+            <router-link :to="{name: 'completedMatches'}">완료된 매칭 조회</router-link>
             <router-link :to="{name: 'matchApplications'}">매칭 신청 이력 조회</router-link>
           </div>
         </div>
-
-        <!-- Match List 탭 -->
-        <router-link to="/" class="tab">Match List</router-link>
 
         <!-- Community 탭 -->
         <div class="tab dropdown-parent">

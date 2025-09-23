@@ -38,9 +38,7 @@ export const useMatchStore = defineStore('match', () => {
 
   const fetchImminentMatches = async () => {
     const response = await api.get('/api/v1/match-service/imminent-matches');
-
-    console.log(response.data);
-
+    
     imminentMatches.value = response.data; 
   }
 

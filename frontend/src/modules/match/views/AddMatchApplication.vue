@@ -43,7 +43,7 @@ import { useSportStore } from '../stores/sportStore';
             
 
             if(result.code === 201) {
-                alert('정상적으로 등록되었습니다.');
+                alert('신청이 완료되었습니다!.');
 
                 router.push({name: 'matchApplications'});
             }
@@ -53,16 +53,20 @@ import { useSportStore } from '../stores/sportStore';
             if(status === 'BAD_REQUEST') {
                 alert('제대로 입력해 주세요.');
             } else if(status === 'REFRESH_TOKEN_INVALID') {
-                router.push({name: 'login'});
+                router.push({name: 'Login'});
             } else if(status === 'INTERNAL_SERVER_ERROR') {
                 alert('에러가 발생했습니다.');
             } else if(status === 'SPORT_NOT_FOUND') {
                 alert(message);
+            } else if(status === 'INVALID_MATCH_DATE') {
+                alert(message);
+            } else if(status === 'INVALID_MATCH_TIME') {
+                alert(message);
             } else if(status === 'DUPLICATE_MATCH_APPLICATION') {
-              alert(message);
+                alert(message);
             }
-        }
     };
+  }
 
     onMounted (async () => {
         await sportStore.fetchSports();
