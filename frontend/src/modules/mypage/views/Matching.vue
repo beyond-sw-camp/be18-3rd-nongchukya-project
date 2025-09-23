@@ -4,12 +4,17 @@
 
     <div v-if="matches.length === 0">진행 중인 매치가 없습니다.</div>
 
-    <div v-else class="match-list">
-      <div v-for="match in paginatedMatches" :key="match.matchId" class="match-card">
-        <h3>{{ match.title }}</h3>
-        <p><strong>상대:</strong> {{ match.opponentNickname }}</p>
-        <p><strong>일정:</strong> {{ formatDate(match.matchDate) }}</p>
-        <p><strong>장소:</strong> {{ match.location }}</p>
+    <div v-else>
+      <div v-for="match in paginatedMatches" :key="match.id" class="match-card">
+        <h3>{{ match.sport }} 경기</h3>
+
+        <p v-if="match.opponentNickname"><strong>상대:</strong> {{ match.opponentNickname }}</p>
+
+        <p v-if="match.matchDate || match.matchTime">
+          <strong>일정:</strong> {{ formatDate(match.matchDate) }} {{ match.matchTime || '' }}
+        </p>
+
+        <p><strong>장소:</strong> {{ match.region }}</p>
       </div>
 
       <div class="pagination" v-if="totalPages > 1">
@@ -21,21 +26,32 @@
   </div>
 </template>
 
+
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useMatchStore } from '@/modules/match/stores/matchStore'
 
 const matchStore = useMatchStore()
 const currentPage = ref(1)
 const pageSize = 5
 
+// computed로 store matches 가져오기
 const matches = computed(() => matchStore.matches)
 
-const props = defineProps({
-  activeTab: String
-})
+// props로 activeTab 받기
+const props = defineProps({ activeTab: String })
 
-// activeTab이 'matching'으로 바뀔 때마다 fetch
+// 서버에서 매칭 중 경기 fetch
+const fetchMatchesPage = async () => {
+  try {
+    await matchStore.fetchMatches(currentPage.value, pageSize)
+    // console.log('matches loaded:', matchStore.matches)
+  } catch (err) {
+    console.error(err)
+  }
+}
+
+// activeTab이 'matching'일 때만 fetch
 watch(() => props.activeTab, (newTab) => {
   if (newTab === 'matching') fetchMatchesPage()
 })
@@ -44,22 +60,26 @@ watch(() => props.activeTab, (newTab) => {
 const totalPages = computed(() => Math.ceil(matches.value.length / pageSize))
 const paginatedMatches = computed(() => {
   const start = (currentPage.value - 1) * pageSize
-  const end = start + pageSize
-  return matches.value.slice(start, end)
+  return matches.value.slice(start, start + pageSize)
 })
 
 // 페이지 이동
-const prevPage = () => { if (currentPage.value > 1) currentPage.value-- }
-const nextPage = () => { if (currentPage.value < totalPages.value) currentPage.value++ }
-
-// 매칭 데이터 fetch
-const fetchMatchesPage = async () => {
-  await matchStore.fetchMatches(currentPage.value, pageSize)
+const prevPage = () => {
+  if (currentPage.value > 1) currentPage.value--
+}
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) currentPage.value++
 }
 
-// 페이지 변경 시 fetch
+// currentPage 변경 시 fetch
 watch(currentPage, fetchMatchesPage)
 
+// 초기 마운트 시 fetch
+onMounted(() => {
+  if (props.activeTab === 'matching') fetchMatchesPage()
+})
+
+// 날짜 포맷 함수
 const formatDate = isoStr => new Date(isoStr).toLocaleString()
 </script>
 
