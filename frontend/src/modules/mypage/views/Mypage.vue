@@ -39,10 +39,11 @@
       :user-data="userData"
       :user-levels="userLevels"
       @update="updateUserData"
+      
     />
     <!-- 신고 섹션 (자식 컴포넌트) -->
     <ReportSection v-if="activeTab === 'report'" />
-
+    <Setting v-if="activeTab === 'settings'" />   <!-- 추가 -->
     
     
   </div>
@@ -54,6 +55,8 @@ import axios from 'axios'
 import defaultProfile from '@/assets/default_profile.png'
 import ProfileSection from './ProfileSection.vue'
 import ReportSection from './Report.vue'
+import Setting from './Setting.vue'
+
 
 const profile = ref(null)
 const userData = ref(null)
@@ -70,22 +73,22 @@ const tabs = [
 
 onMounted(async () => {
   try {
-
-
     const token = localStorage.getItem('accessToken')
 
-    // 프로필 정보
+    // 프로필 정보 (응답이 객체 그대로이므로 items[0] 대신 data 사용)
     const profileRes = await axios.get('http://localhost:8080/api/v1/mypage/profile', {
       headers: { Authorization: `Bearer ${token}` }
     })
 
-    if (profileRes.data?.items?.length > 0) {
-      profile.value = profileRes.data.items[0]
+    const profileData = profileRes.data
+
+    if (profileData) {
+      profile.value = profileData
       userData.value = {
-        ...profile.value,
-        phone: profile.value.phoneNumber || '미등록',
-        profileImage: profile.value.profileImage || defaultProfile,
-        favoriteSports: profile.value.favoriteSports || [] // 선호 운동 추가
+        ...profileData,
+        phone: profileData.phoneNumber || '미등록',
+        profileImage: profileData.profileImage || defaultProfile,
+        favoriteSports: profileData.favoriteSports || [] // 선호 운동 추가
       }
     }
 

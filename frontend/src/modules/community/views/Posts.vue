@@ -53,34 +53,37 @@
     <!-- 게시글 리스트 -->
     <div class="post-items">
       <div
+        v-if="postStore.posts?.length"
         class="post-item"
         v-for="post in postStore.posts"
-        :key="post.postId"
+        :key="post.postId ?? post.id"
         @click="postClick(post.postId)"
       >
         <span class="post-title">
-          <router-link :to="{ name: 'post-detail', params: { postId: post.postId } }" @click.stop>
-            {{ post.title }}
+          <router-link 
+            :to="{ name: 'post-detail', params: { postId: post.postId }, query: { category: selectedCategory || '' } }"
+            @click.stop
+          >
+            {{ post.title || '제목 없음' }}
           </router-link>
-          <span class="comments">[{{ post.commentCount }}]</span>
+          <span class="comments">[{{ post.commentCount ?? 0 }}]</span>
         </span>
-        <span class="writer">{{ post.userNickname }}</span>
+        <span class="writer">{{ post.userNickname || '익명' }}</span>
         <span class="date">{{ formatDate(post.createdAt) }}</span>
-        <span class="views">👁️{{ post.viewCount }}</span>
-        <span class="likes">❤️ {{ post.likeCount }}</span>
+        <span class="views">👁️{{ post.viewCount ?? 0 }}</span>
+        <span class="likes">❤️ {{ post.likeCount ?? 0 }}</span>
       </div>
+      <div v-else class="no-posts">게시글이 없습니다.</div>
     </div>
 
     <!-- 게시글 작성 버튼 -->
     <div class="create-post-btn-container">
-      <button class="create-post-btn" @click="goToCreatePost">
-        게시글 작성
-      </button>
+      <button class="create-post-btn" @click="goToCreatePost">게시글 작성</button>
     </div>
 
     <!-- Pagination -->
     <Pagination
-      v-if="postStore.pageInfo.totalCount > 0"
+      v-if="postStore.pageInfo?.totalCount > 0"
       :page-info="postStore.pageInfo"
       @change-page="changePage"
     />
@@ -99,20 +102,20 @@ const router = useRouter();
 
 const categories = ref(['자유게시판', '질문게시판', '정보공유게시판']);
 const selectedCategory = ref('');
+const selectedSort = ref('latest');
+const sortDirection = ref('desc');  
 
-// 정렬 기본값: 최신순
-const selectedSort = ref('latest'); // latest, oldest, views, likes, comments
-const sortDirection = ref('desc');  // asc / desc
-
-// 검색
 const searchType = ref("title");
 const searchKeyword = ref("");
-const isSearching = ref(false); // 검색 상태 추적
+const isSearching = ref(false);  
 
-// 날짜 포맷 함수 (시:분:초까지)
+const token = localStorage.getItem("accessToken");
+
+// 날짜 포맷 안전 처리
 const formatDate = (dateStr) => {
   if (!dateStr) return '';
   const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return '';
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
@@ -122,25 +125,31 @@ const formatDate = (dateStr) => {
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 };
 
-// 게시글 목록 로드 공통 함수
+// 게시글 로드
 const loadPosts = async (page = 1) => {
-  if (isSearching.value && searchKeyword.value.trim()) {
-    await postStore.searchPosts(
-      searchType.value,
-      searchKeyword.value,
-      page,
-      postStore.pageInfo.listLimit,
-      selectedSort.value,
-      sortDirection.value
-    );
-  } else {
-    await postStore.fetchPosts(
-      page,
-      postStore.pageInfo.listLimit,
-      selectedCategory.value,
-      selectedSort.value,
-      sortDirection.value
-    );
+  try {
+    if (!token) throw new Error("로그인이 필요합니다.");
+    if (isSearching.value && searchKeyword.value.trim()) {
+      await postStore.searchPosts(
+        searchType.value,
+        searchKeyword.value,
+        page,
+        postStore.pageInfo?.listLimit ?? 10,
+        selectedSort.value,
+        sortDirection.value
+      );
+    } else {
+      await postStore.fetchPosts(
+        page,
+        postStore.pageInfo?.listLimit ?? 10,
+        selectedCategory.value,
+        selectedSort.value,
+        sortDirection.value
+      );
+    }
+  } catch (err) {
+    console.error("게시글 로딩 실패", err);
+    alert(err.message || "게시글을 불러오는 중 오류가 발생했습니다.");
   }
 };
 
@@ -151,7 +160,7 @@ const changeSort = async () => {
     name: 'posts',
     query: {
       page: 1,
-      category: selectedCategory.value,
+      category: selectedCategory.value || '',
       type: isSearching.value ? searchType.value : undefined,
       keyword: isSearching.value ? searchKeyword.value : undefined,
       sortBy: selectedSort.value,
@@ -162,24 +171,30 @@ const changeSort = async () => {
 
 // 카테고리 변경
 const changeCategory = async (category) => {
-  selectedCategory.value = category;
-  isSearching.value = false; // 카테고리 변경 시 검색 취소
+  selectedCategory.value = category || '';
+  isSearching.value = false;
   await loadPosts(1);
   router.push({
     name: 'posts',
-    query: { page: 1, category, sortBy: selectedSort.value, sortDir: sortDirection.value },
+    query: { page: 1, category: selectedCategory.value, sortBy: selectedSort.value, sortDir: sortDirection.value },
   });
 };
 
-// 검색 실행
+// 검색
 const searchPosts = async () => {
   if (!searchKeyword.value.trim()) {
     alert("검색어를 입력해주세요.");
     return;
   }
-
   isSearching.value = true;
-  await loadPosts(1);
+
+  await loadPosts(1); // 검색 결과를 불러올 때까지 기다림
+
+  // 검색 결과 없으면 alert
+  if (!postStore.posts?.length) {
+    alert("검색 결과가 없습니다.");
+  }
+
   router.push({
     name: "posts",
     query: {
@@ -202,13 +217,13 @@ const clearSearch = async () => {
 
 // 페이지 변경
 const changePage = async ({ page }) => {
-  if (page < 1) return;
+  if (!page || page < 1) return;
   await loadPosts(page);
   router.push({
     name: 'posts',
     query: {
       page,
-      category: selectedCategory.value,
+      category: selectedCategory.value || '',
       type: isSearching.value ? searchType.value : undefined,
       keyword: isSearching.value ? searchKeyword.value : undefined,
       sortBy: selectedSort.value,
@@ -217,9 +232,17 @@ const changePage = async ({ page }) => {
   });
 };
 
-// 게시글 상세 이동
+// 게시글 상세 클릭
 const postClick = (postId) => {
-  router.push({ name: 'post-detail', params: { postId } });
+  if (!postId) {
+    alert("잘못된 게시글입니다.");
+    return;
+  }
+  router.push({
+    name: 'post-detail',
+    params: { postId },
+    query: { category: selectedCategory.value || '' }
+  });
 };
 
 // 게시글 작성 이동
@@ -227,51 +250,38 @@ const goToCreatePost = () => {
   router.push({ name: 'create-post' });
 };
 
-// 초기 데이터 로드
+// 초기 로드
 onMounted(async () => {
   const currentPage = parseInt(route.query.page) || 1;
-  const category = route.query.category || '';
-  const sortBy = route.query.sortBy || 'latest';
-  const sortDir = route.query.sortDir || 'desc';
-  const type = route.query.type || null;
-  const keyword = route.query.keyword || null;
+  selectedCategory.value = route.query.category || '';
+  selectedSort.value = route.query.sortBy || 'latest';
+  sortDirection.value = route.query.sortDir || 'desc';
 
-  selectedCategory.value = category;
-  selectedSort.value = sortBy;
-  sortDirection.value = sortDir;
-
-  if (type && keyword) {
-    searchType.value = type;
-    searchKeyword.value = keyword;
+  if (route.query.type && route.query.keyword) {
+    searchType.value = route.query.type;
+    searchKeyword.value = route.query.keyword;
     isSearching.value = true;
-    await loadPosts(currentPage);
-  } else {
-    await loadPosts(currentPage);
   }
+
+  await loadPosts(currentPage);
 });
 
 // 라우트 변경 감지
 onBeforeRouteUpdate(async (to) => {
   const currentPage = parseInt(to.query.page) || 1;
-  const category = to.query.category || '';
-  const sortBy = to.query.sortBy || 'latest';
-  const sortDir = to.query.sortDir || 'desc';
-  const type = to.query.type || null;
-  const keyword = to.query.keyword || null;
+  selectedCategory.value = to.query.category || '';
+  selectedSort.value = to.query.sortBy || 'latest';
+  sortDirection.value = to.query.sortDir || 'desc';
 
-  selectedCategory.value = category;
-  selectedSort.value = sortBy;
-  sortDirection.value = sortDir;
-
-  if (type && keyword) {
-    searchType.value = type;
-    searchKeyword.value = keyword;
+  if (to.query.type && to.query.keyword) {
+    searchType.value = to.query.type;
+    searchKeyword.value = to.query.keyword;
     isSearching.value = true;
-    await loadPosts(currentPage);
   } else {
     isSearching.value = false;
-    await loadPosts(currentPage);
   }
+
+  await loadPosts(currentPage);
 });
 </script>
 
@@ -321,16 +331,18 @@ select option {
 }
 
 .post-title a {
-  color: #333 !important;        /* 기본 글자색 검은색 */
+  color: #333 !important;       
   text-decoration: none !important; /* 밑줄 제거 */
-  font-weight: 500;               /* 기본 글씨 굵기 */
-  transition: font-weight 0.2s, color 0.2s;
+  font-size: 15px;               
+  font-family: 'monospace';
+  letter-spacing: 0.5px;         
+  transition: all 0.3s;
 }
 
 .post-title a:hover {
-  color: #1a73e8 !important;         
-  text-decoration: none !important; /* 호버 시 밑줄 제거 */
-  font-weight: 600;               /* 호버 시 글씨 굵게 */
+  color: #1a73e8 !important;     
+  font-weight: 700;               /* 호버 시 강조 */
+  transform: translateX(2px);     /* 호버 시 살짝 이동 */
 }
 
 
@@ -541,4 +553,5 @@ select option {
   font-size: 13px;
   color: #888;
 }
+
 </style>

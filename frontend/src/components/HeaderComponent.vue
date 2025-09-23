@@ -46,7 +46,7 @@
           <i class="mdi mdi-send-outline"></i>
         </router-link>
 
-        <router-link v-if="isLogin" to="/" class="icon-btn" title="마이페이지">
+        <router-link v-if="isLogin" to="/mypage" class="icon-btn" title="마이페이지">
           <i class="mdi mdi-account-circle-outline"></i>
         </router-link>
 
