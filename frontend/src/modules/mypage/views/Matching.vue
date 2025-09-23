@@ -1,19 +1,16 @@
-<template>
-  <div class="matching-section">
-    <h2>매칭 중 경기</h2>
+<template> 
+  <div class="matching-section"> 
+    <h2>매칭 중 경기</h2> 
 
-    <div v-if="matches.length === 0">진행 중인 매치가 없습니다.</div>
+    <div v-if="matches.length === 0">
+      진행 중인 매치가 없습니다.
+    </div> 
 
-    <div v-else>
+    <div v-else class="match-list">
       <div v-for="match in paginatedMatches" :key="match.id" class="match-card">
         <h3>{{ match.sport }} 경기</h3>
-
-        <p v-if="match.opponentNickname"><strong>상대:</strong> {{ match.opponentNickname }}</p>
-
-        <p v-if="match.matchDate || match.matchTime">
-          <strong>일정:</strong> {{ formatDate(match.matchDate) }} {{ match.matchTime || '' }}
-        </p>
-
+        <p><strong>상대:</strong> {{ match.opponentNickname || '미정' }}</p>
+        <p><strong>일정:</strong> {{ formatDate(match.matchDate) }} {{ match.matchTime }}</p>
         <p><strong>장소:</strong> {{ match.region }}</p>
       </div>
 
@@ -25,7 +22,6 @@
     </div>
   </div>
 </template>
-
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
@@ -45,7 +41,7 @@ const props = defineProps({ activeTab: String })
 const fetchMatchesPage = async () => {
   try {
     await matchStore.fetchMatches(currentPage.value, pageSize)
-    // console.log('matches loaded:', matchStore.matches)
+    console.log('matches loaded:', matchStore.matches)
   } catch (err) {
     console.error(err)
   }
@@ -64,12 +60,8 @@ const paginatedMatches = computed(() => {
 })
 
 // 페이지 이동
-const prevPage = () => {
-  if (currentPage.value > 1) currentPage.value--
-}
-const nextPage = () => {
-  if (currentPage.value < totalPages.value) currentPage.value++
-}
+const prevPage = () => { if (currentPage.value > 1) currentPage.value-- }
+const nextPage = () => { if (currentPage.value < totalPages.value) currentPage.value++ }
 
 // currentPage 변경 시 fetch
 watch(currentPage, fetchMatchesPage)

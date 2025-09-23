@@ -46,8 +46,9 @@
     <Matching v-if="activeTab === 'matching'" :active-tab="activeTab" />
     <Setting v-if="activeTab === 'settings'" />   <!-- 추가 -->
     
-    <matchResults
-      :matchResults="matchStore.matchResults"/>
+    <MatchResults 
+      v-if="activeTab === 'matches'" 
+    :matchResults="matchStore.matchResults" />
     
   </div>
 </template>
@@ -61,6 +62,7 @@ import MatchResults from '@/modules/match/components/MatchResults.vue'
 import ReportSection from './Report.vue'
 import Setting from './Setting.vue'
 import { useMatchStore } from '@/modules/match/stores/matchStore'
+import Matching from './Matching.vue'
 
   const matchStore = useMatchStore();
 
@@ -72,7 +74,7 @@ import { useMatchStore } from '@/modules/match/stores/matchStore'
   const tabs = [
     { id: 'profile', label: '프로필' },
     { id: 'matches', label: '매치기록' },
-    { id: 'stats', label: '통계' },
+    { id: 'matching', label: '매칭 중 경기' },
     { id : 'report', label: '신고' },
     { id: 'settings', label: '설정' }
   ]
