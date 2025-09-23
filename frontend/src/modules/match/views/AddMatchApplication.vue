@@ -18,6 +18,7 @@ import { useSportStore } from '../stores/sportStore';
 
     const router = useRouter();
     const sportStore = useSportStore();
+    const matchApplicationStore = useMatchApplicationStore();
 
     const initFormData = reactive({
         sport: '',
@@ -27,8 +28,6 @@ import { useSportStore } from '../stores/sportStore';
         endTime: '',
         genderOption: ''
     });
-
-    const matchApplicationStore = useMatchApplicationStore();
 
     const formSubmit = async (formData) => {
         try {

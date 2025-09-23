@@ -56,16 +56,7 @@
 </template>
 
 <script setup>
-import { reactive, toRaw } from 'vue'
-
-const formData = reactive({
-  sport: "",
-  region: "",
-  matchDate: "",
-  startTime: "",
-  endTime: "",
-  genderOption: "A"
-})
+import { reactive, toRaw } from 'vue';
 
 const props = defineProps({
   initFormData: Object,
@@ -77,13 +68,15 @@ const props = defineProps({
     type: Array,
     required: true
   }
-})
+});
 
-const emit = defineEmits(['form-submit'])
+const formData = reactive({ ...props.initFormData });
+
+const emit = defineEmits(['form-submit']);
 
 const submitClick = () => {
   emit('form-submit', toRaw(formData))
-}
+};
 </script>
 <style scoped>
 form {
