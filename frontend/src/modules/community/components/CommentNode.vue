@@ -5,24 +5,33 @@
       <img class="avatar" :src="comment.userProfileImage || defaultAvatar" />
       <div class="comment-content-wrapper">
         <div class="comment-header">
-          <strong>{{ comment.userNickname }}</strong>
+          <div class="name-badge">
+            <strong>{{ comment.userNickname }}</strong>
+            <span v-if="comment.author" class="author-badge">작성자</span>
+          </div>
           <span class="date">{{ formatDate(comment.createdAt) }}</span>
         </div>
 
+        <!-- 수정 모드 -->
         <template v-if="editing">
           <input v-model="editContent" class="edit-input" />
           <div class="edit-actions">
-            <button class="save-btn" @click="updateComment">💾</button>
-            <button class="cancel-btn" @click="cancelEdit">✖</button>
+            <button class="save-btn" @click="updateComment" title="저장" :disabled="editingComment">
+              <span class="icon">💾</span>
+            </button>
+            <button class="cancel-btn" @click="cancelEdit" title="취소">
+              <span class="icon">✖</span>
+            </button>
           </div>
         </template>
 
+        <!-- 일반 댓글 -->
         <template v-else>
           <div class="comment-body">{{ comment.content }}</div>
           <div class="comment-footer">
             <button @click="toggleReplyInput">↩ 답글</button>
-            <button @click="startEdit">✏ 수정</button>
-            <button @click="deleteComment">🗑 삭제</button>
+            <button @click="startEdit" :disabled="editingComment">✏ 수정</button>
+            <button @click="deleteComment" :disabled="deletingComment">🗑 삭제</button>
           </div>
         </template>
       </div>
@@ -31,7 +40,7 @@
     <!-- 답글 입력 -->
     <div v-if="showReplyInput" class="reply-input">
       <input v-model="newReply" placeholder="댓글을 입력하세요" />
-      <button @click="addReply">등록</button>
+      <button @click="addReply" :disabled="postingReply">등록</button>
     </div>
 
     <!-- 대댓글 리스트 재귀 -->
@@ -67,6 +76,9 @@ const showReplyInput = ref(false);
 const newReply = ref("");
 const editing = ref(false);
 const editContent = ref("");
+const postingReply = ref(false);
+const editingComment = ref(false);
+const deletingComment = ref(false);
 
 const defaultAvatar = "https://via.placeholder.com/40";
 
@@ -81,10 +93,16 @@ const formatDate = (dateStr) => {
   return `${y}-${m}-${d} ${h}:${min}`;
 };
 
+// 답글 토글
 const toggleReplyInput = () => (showReplyInput.value = !showReplyInput.value);
 
+// 대댓글 작성
 const addReply = async () => {
-  if (!newReply.value.trim()) return;
+  if (!props.postId || !props.token) return alert("게시글 정보가 없습니다.");
+  if (!newReply.value.trim()) return alert("댓글 내용을 입력해주세요.");
+  if (postingReply.value) return;
+
+  postingReply.value = true;
   try {
     const res = await axios.post(
       `http://localhost:8080/api/v1/community/posts/${props.postId}/comments/${props.comment.commentId}/replies`,
@@ -97,18 +115,29 @@ const addReply = async () => {
     showReplyInput.value = false;
   } catch (err) {
     console.error("대댓글 작성 실패", err);
+    alert("대댓글 작성에 실패했습니다.");
+  } finally {
+    postingReply.value = false;
   }
 };
 
+// 댓글 수정
 const startEdit = () => {
   editing.value = true;
-  editContent.value = props.comment.content;
+  editContent.value = props.comment.content || "";
 };
+
 const cancelEdit = () => {
   editing.value = false;
   editContent.value = "";
 };
+
 const updateComment = async () => {
+  if (!props.postId || !props.token) return alert("게시글 정보가 없습니다.");
+  if (!editContent.value.trim()) return alert("댓글 내용을 입력해주세요.");
+  if (editingComment.value) return;
+
+  editingComment.value = true;
   try {
     await axios.put(
       `http://localhost:8080/api/v1/community/posts/${props.postId}/comments/${props.comment.commentId}`,
@@ -119,11 +148,19 @@ const updateComment = async () => {
     cancelEdit();
   } catch (err) {
     console.error("댓글 수정 실패", err);
+    alert("댓글 수정에 실패했습니다.");
+  } finally {
+    editingComment.value = false;
   }
 };
 
+// 댓글 삭제
 const deleteComment = async () => {
+  if (!props.postId || !props.token) return alert("게시글 정보가 없습니다.");
   if (!confirm("정말 삭제하시겠습니까?")) return;
+  if (deletingComment.value) return;
+
+  deletingComment.value = true;
   try {
     await axios.delete(
       `http://localhost:8080/api/v1/community/posts/${props.postId}/comments/${props.comment.commentId}`,
@@ -132,6 +169,9 @@ const deleteComment = async () => {
     emit("refresh-comments");
   } catch (err) {
     console.error("댓글 삭제 실패", err);
+    alert("댓글 삭제에 실패했습니다.");
+  } finally {
+    deletingComment.value = false;
   }
 };
 </script>
@@ -291,4 +331,68 @@ const deleteComment = async () => {
   background-color: #bdbdbd;
 }
 
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.name-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px; /* 닉네임과 뱃지 간격 */
+}
+
+.author-badge {
+  padding: 2px 6px;
+  background-color: #e0f0ff; /* 연한 파랑 배경 */
+  color: #1a73e8; /* 진한 파랑 글자 */
+  font-size: 12px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.edit-actions button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.2s;
+}
+
+.save-btn {
+  background-color: #1a73e8; /* 진한 파랑 */
+  color: #fff;
+}
+
+.save-btn:hover {
+  background-color: #1558b0;
+}
+
+.cancel-btn {
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+.cancel-btn:hover {
+  background-color: #bdbdbd;
+}
+
+.edit-actions .icon {
+  display: inline-block;
+  transform: scale(1.2); /* 아이콘 약간 확대 */
+}
 </style>
