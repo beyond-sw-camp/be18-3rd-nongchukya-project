@@ -38,16 +38,6 @@
 <script setup>
 import { reactive, toRaw } from 'vue';
 
-    const formData = reactive({
-        sport: "",       
-        region: "",
-        matchDate: "",
-        startTime: "",
-        endTime: "",
-        genderOption: "A"
-    });
-
-    // eslint-disable-next-line no-unused-vars
     const props = defineProps({
         initFormData: Object,
         formType: {
@@ -59,6 +49,8 @@ import { reactive, toRaw } from 'vue';
             required: true
         }
     });
+
+    const formData = reactive({ ...props.initFormData });
 
     const emit = defineEmits(['form-submit']);
 
