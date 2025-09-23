@@ -7,6 +7,9 @@ export const useMatchStore = defineStore('match', () => {
   const completedMatches = ref([]);
   const imminentMatches = ref([]);
   const dailyMatches = ref([]);
+
+  const matchResults = ref([]);
+
   const pageInfo = reactive({
     currentPage: 1, // 현재 페이지 번호
     totalCount: 0,  // 전체 데이터 수
@@ -20,12 +23,6 @@ export const useMatchStore = defineStore('match', () => {
     matches.value = response.data.items;
     pageInfo.totalCount = response.data.totalCount;
     pageInfo.listLimit = numOfRows;
-  };
-
-  const cancelMatch = async (applicationId) => {
-    const response = await api.delete(`/api/v1/match-service/match-applications/${applicationId}`);
-
-    return response.data;
   };
 
   const fetchCompletedMatches = async (page, numOfRows) => {
@@ -50,6 +47,21 @@ export const useMatchStore = defineStore('match', () => {
     pageInfo.listLimit = numOfRows; 
   }
 
-  return { matches, completedMatches, imminentMatches, dailyMatches, pageInfo, 
-    fetchMatches, cancelMatch, fetchCompletedMatches, fetchImminentMatches, fetchDailyMatches };
+  const fetchMatchResults = async () => {
+    try {
+      const response = await api.get('/api/v1/match-service/match-results');
+
+      console.log(response);
+      
+
+      matchResults.value = response.data;
+      return response.data;
+    } catch (error) {
+      console.error('경기 결과 불러오기 실패:', error);
+      matchResults.value = null;
+    }
+  };
+
+  return { matches, completedMatches, imminentMatches, dailyMatches, matchResults, pageInfo, 
+    fetchMatches, fetchCompletedMatches, fetchImminentMatches, fetchDailyMatches, fetchMatchResults };
 });

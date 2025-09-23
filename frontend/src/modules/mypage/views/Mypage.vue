@@ -46,6 +46,9 @@
     <Matching v-if="activeTab === 'matching'" :active-tab="activeTab" />
     <Setting v-if="activeTab === 'settings'" />   <!-- 추가 -->
     
+    <matchResults
+      :matchResults="matchStore.matchResults"/>
+    
   </div>
 </template>
 
@@ -54,82 +57,87 @@ import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import defaultProfile from '@/assets/default_profile.png'
 import ProfileSection from './ProfileSection.vue'
+import MatchResults from '@/modules/match/components/MatchResults.vue'
 import ReportSection from './Report.vue'
 import Setting from './Setting.vue'
-import Matching from './Matching.vue'
+import { useMatchStore } from '@/modules/match/stores/matchStore'
 
+  const matchStore = useMatchStore();
 
-const profile = ref(null)
-const userData = ref(null)
-const userLevels = ref({}) // 운동 레벨 정보
-const activeTab = ref('profile')
+  const profile = ref(null)
+  const userData = ref(null)
+  const userLevels = ref({}) // 운동 레벨 정보
+  const activeTab = ref('profile')
 
-const tabs = [
-  { id: 'profile', label: '프로필' },
-  { id: 'matches', label: '매치기록' },
-  { id: 'matching', label: '매칭 중 경기' },
-  { id : 'report', label: '신고' },
-  { id: 'settings', label: '설정' }
-]
+  const tabs = [
+    { id: 'profile', label: '프로필' },
+    { id: 'matches', label: '매치기록' },
+    { id: 'stats', label: '통계' },
+    { id : 'report', label: '신고' },
+    { id: 'settings', label: '설정' }
+  ]
 
-onMounted(async () => {
-  try {
-    const token = localStorage.getItem('accessToken')
+  onMounted(async () => {
+    try {
+      const token = localStorage.getItem('accessToken')
 
-    // 프로필 정보 (응답이 객체 그대로이므로 items[0] 대신 data 사용)
-    const profileRes = await axios.get('http://localhost:8080/api/v1/mypage/profile', {
-      headers: { Authorization: `Bearer ${token}` }
-    })
+      // 경기 결과
+      await matchStore.fetchMatchResults();
 
-    const profileData = profileRes.data
+      // 프로필 정보 (응답이 객체 그대로이므로 items[0] 대신 data 사용)
+      const profileRes = await axios.get('http://localhost:8080/api/v1/mypage/profile', {
+        headers: { Authorization: `Bearer ${token}` }
+      })
 
-    if (profileData) {
-      profile.value = profileData
+      const profileData = profileRes.data
+
+      if (profileData) {
+        profile.value = profileData
+        userData.value = {
+          ...profileData,
+          phone: profileData.phoneNumber || '미등록',
+          profileImage: profileData.profileImage || defaultProfile,
+          favoriteSports: profileData.favoriteSports || [] // 선호 운동 추가
+        }
+      }
+
+      // 운동 레벨 정보
+      const levelsRes = await axios.get('http://localhost:8080/api/v1/mypage/levels', {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+
+      let levelsData = levelsRes.data
+      if (typeof levelsData === 'string') {
+        levelsData = JSON.parse(levelsData)
+      }
+
+      // sportName 기준으로 매핑
+      userLevels.value = levelsData.reduce((acc, item) => {
+        acc[item.sportName] = {
+          levelId: item.levelId,
+          levelName: item.levelName,
+          interest: item.interest
+        }
+        return acc
+      }, {})
+
+    } catch (err) {
+      console.error('마이페이지 호출 에러:', err)
       userData.value = {
-        ...profileData,
-        phone: profileData.phoneNumber || '미등록',
-        profileImage: profileData.profileImage || defaultProfile,
-        favoriteSports: profileData.favoriteSports || [] // 선호 운동 추가
+        name: '사용자',
+        email: '-',
+        phone: '-',
+        address: '-',
+        age: '-',
+        profileImage: defaultProfile,
+        favoriteSports: []
       }
     }
+  })
 
-    // 운동 레벨 정보
-    const levelsRes = await axios.get('http://localhost:8080/api/v1/mypage/levels', {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-
-    let levelsData = levelsRes.data
-    if (typeof levelsData === 'string') {
-      levelsData = JSON.parse(levelsData)
-    }
-
-    // sportName 기준으로 매핑
-    userLevels.value = levelsData.reduce((acc, item) => {
-      acc[item.sportName] = {
-        levelId: item.levelId,
-        levelName: item.levelName,
-        interest: item.interest
-      }
-      return acc
-    }, {})
-
-  } catch (err) {
-    console.error('마이페이지 호출 에러:', err)
-    userData.value = {
-      name: '사용자',
-      email: '-',
-      phone: '-',
-      address: '-',
-      age: '-',
-      profileImage: defaultProfile,
-      favoriteSports: []
-    }
+  const updateUserData = (data) => {
+    userData.value = { ...userData.value, ...data }
   }
-})
-
-const updateUserData = (data) => {
-  userData.value = { ...userData.value, ...data }
-}
 </script>
 
 <style scoped>

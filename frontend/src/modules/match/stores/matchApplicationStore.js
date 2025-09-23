@@ -27,6 +27,7 @@ export const useMatchApplicationStore = defineStore('matchApplication', () => {
 
     const cancelMatchApplication = async (applicationId) => {
         const response = await api.delete(`/api/v1/match-service/match-applications/${applicationId}`);
+        
         return response.data;
     };
 

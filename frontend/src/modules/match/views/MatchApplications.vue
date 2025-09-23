@@ -59,8 +59,6 @@ import { useMatchApplicationStore } from '../stores/matchApplicationStore';
     onMounted(async () => {
         try {
             matchApplicationStore.pageInfo.currentPage = parseInt(currentRoute.query.page) || 1;
-
-            console.log(matchApplicationStore.matchApplications);
             
             await matchApplicationStore.fetchMatchApplications(matchApplicationStore.pageInfo.currentPage, 10);
         } catch (error) {
