@@ -118,6 +118,9 @@ export default {
       this.selectedRoomName = chat ? chat.roomName : "채팅";
       this.drawerOpen = true;
       document.body.style.overflow = "hidden"; // 스크롤 잠금
+      if (chat) {
+        chat.unReadCount = 0;
+      }
     },
     closeDrawer() {
       this.drawerOpen = false;

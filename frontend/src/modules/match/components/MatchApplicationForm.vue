@@ -47,6 +47,7 @@ import { reactive, toRaw } from 'vue';
         genderOption: "A"
     });
 
+    // eslint-disable-next-line no-unused-vars
     const props = defineProps({
         initFormData: Object,
         formType: {
