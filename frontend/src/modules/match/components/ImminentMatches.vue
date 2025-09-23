@@ -2,10 +2,10 @@
   <section class="imminent-matches">
     <h2 class="section-title">🔥 곧 마감! 빨리 신청하세요.</h2>
     <div class="cards-wrapper">
-      <div class="card" v-for="match in imminentMatches" :key="match.matchTime">
+      <div class="card" v-for="match in imminentMatches" :key="match.id" @click="$emit('apply-click', match)">
         <span class="tag">마감임박</span>
         <div class="card-content">
-          <div class="time">{{ match.matchTime }}</div>
+          <div class="time">{{ match.matchDate }} {{ getStartTime(match.matchTime) }}</div>
           <div class="details">{{ match.sport }} {{ match.region }}</div>
         </div>
       </div>
@@ -14,12 +14,24 @@
 </template>
 
 <script setup>
-defineProps({
-  imminentMatches: {
-    type: Array,
-    required: true,
-  },
-});
+  defineProps({
+    imminentMatches: {
+      type: Array,
+      required: true,
+    },
+  });
+
+  const getStartTime = (timeRange) => {
+    const startTime = timeRange.split('-')[0];
+
+    if (startTime && startTime.length === 4) {
+      const hours = startTime.substring(0, 2);
+      const minutes = startTime.substring(2, 4);
+      return `${hours}:${minutes}`;
+    }
+
+    return startTime;
+};
 </script>
 
 <style scoped>

@@ -16,25 +16,27 @@
     </div>
 
     <main class="match-list">
-      <div class="match-item" v-for="match in dailyMatches" :key="match.matchTime">
+      <div class="match-item" v-for="match in dailyMatches" :key="match.id">
         <div class="match-time">{{ match.matchTime }}</div>
         <div class="match-info">
           <div class="match-sport">{{ match.sport }}</div>
           <div class="match-location">{{ match.region }}</div>
         </div>
-        <button class="apply-button">신청</button>
+        <button class="apply-button" @click="$emit('apply-click', match)" >신청</button>
       </div>
     </main>
   </div>
 </template>
 
 <script setup>
-defineProps({
-  dailyMatches: {
-    type: Array,
-    required: true,
-  },
-});
+  defineProps({
+    dailyMatches: {
+      type: Array,
+      required: true,
+    },
+  });
+
+  defineEmits(['apply-click']);
 </script>
 
 <style scoped>
