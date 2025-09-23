@@ -63,7 +63,7 @@ async function sendCode() {
     verificationSent.value = true
     message.value = `인증번호가 ${email.value}로 전송되었습니다.`
   } catch (err) {
-    console.error("❌ 인증 메일 전송 실패:", err)
+    console.error("인증 메일 전송 실패:", err)
     alert("이메일 인증 요청 실패: " + (err.response?.data?.message || err.message))
   }
 }
@@ -77,7 +77,7 @@ async function verifyCode() {
     })
     if (res.data.success) {
       message.value = "인증 성공!"
-      // ✅ 인증 성공 시 비밀번호 재설정 페이지로 이동
+      // 인증 성공 시 비밀번호 재설정 페이지로 이동
       router.push({ name: "ResetPassword", query: { email: email.value } })
     } else {
       message.value = ""
