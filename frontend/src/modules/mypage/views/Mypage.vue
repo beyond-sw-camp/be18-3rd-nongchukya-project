@@ -43,6 +43,7 @@
     />
     <!-- 신고 섹션 (자식 컴포넌트) -->
     <ReportSection v-if="activeTab === 'report'" />
+    <Matching v-if="activeTab === 'matching'" :active-tab="activeTab" />
     <Setting v-if="activeTab === 'settings'" />   <!-- 추가 -->
     
     <matchResults
