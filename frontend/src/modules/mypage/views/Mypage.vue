@@ -43,8 +43,8 @@
     />
     <!-- 신고 섹션 (자식 컴포넌트) -->
     <ReportSection v-if="activeTab === 'report'" />
+    <Matching v-if="activeTab === 'matching'" :active-tab="activeTab" />
     <Setting v-if="activeTab === 'settings'" />   <!-- 추가 -->
-    
     
   </div>
 </template>
@@ -56,6 +56,7 @@ import defaultProfile from '@/assets/default_profile.png'
 import ProfileSection from './ProfileSection.vue'
 import ReportSection from './Report.vue'
 import Setting from './Setting.vue'
+import Matching from './Matching.vue'
 
 
 const profile = ref(null)
@@ -66,7 +67,7 @@ const activeTab = ref('profile')
 const tabs = [
   { id: 'profile', label: '프로필' },
   { id: 'matches', label: '매치기록' },
-  { id: 'stats', label: '통계' },
+  { id: 'matching', label: '매칭 중 경기' },
   { id : 'report', label: '신고' },
   { id: 'settings', label: '설정' }
 ]
