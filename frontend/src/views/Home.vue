@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/multi-word-component-names -->
 <template>
   <div class="home-page">
     <DateSelector 
@@ -107,9 +108,8 @@ import { useRoute, useRouter } from 'vue-router';
 
 <style scoped>
 .home-page {
-  margin: auto;
-  padding: 16px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  background-color: #ffffff;
+  min-height: 100vh;
+  background: linear-gradient(to bottom, #FFA652, #EEA562, #F6EADF);
+  font-family: 'Inter', sans-serif;
 }
 </style>

@@ -1,4 +1,5 @@
 <template>
+  <main class="common-back">
   <div class="create-post-container">
     <h1>게시글 작성</h1>
 
@@ -41,6 +42,7 @@
       <button class="cancel-btn" type="button" @click="cancelPost">취소</button>
     </div>
   </div>
+  </main>
 </template>
 
 <script setup>
@@ -120,7 +122,7 @@ const cancelPost = () => {
 <style scoped>
 .create-post-container {
   max-width: 700px;
-  margin: 40px auto;
+  margin: 1px auto;
   padding: 30px;
   background-color: #fff;
   border-radius: 12px;
@@ -237,4 +239,11 @@ textarea {
   background-color: #bdbdbd;
   color: #333;
 }
+
+.common-back {
+  min-height: 100vh;
+  background: linear-gradient(to bottom, #FFA652, #EEA562, #F6EADF);
+  font-family: 'Inter', sans-serif;
+}
+
 </style>
