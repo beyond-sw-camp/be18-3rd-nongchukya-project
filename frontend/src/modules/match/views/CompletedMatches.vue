@@ -1,5 +1,5 @@
 <template>
-  <main>
+  <main class="common-back">
     <completed-match-table 
       :completedMatches="matchStore.completedMatches"
       @cancel-click="cancelClick"/>
@@ -96,5 +96,9 @@ import { useMatchApplicationStore } from '../stores/matchApplicationStore';
 </script>
 
 <style lang="scss" scoped>
-
+.common-back {
+  min-height: 100vh;
+  background: linear-gradient(to bottom, #FFA652, #EEA562, #F6EADF);
+  font-family: 'Inter', sans-serif;
+}
 </style>
