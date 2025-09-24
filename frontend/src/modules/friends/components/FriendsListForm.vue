@@ -18,7 +18,7 @@
         </div>
 
             <!-- 친구 카드 -->
-        <p class="subtitle">{{ friendsStore.friend_list.length }}명의 친구</p>
+        <p class="subtitle">{{ friendsStore.friend_list.length || 0 }}명의 친구</p>
         <div class="friends-grid">
             <div
                 v-for="friend in filteredFriends"
@@ -61,7 +61,7 @@
         </div>
 
         <!-- 검색 결과 없음 -->
-            <div v-if="filteredFriends.length === 0" class="empty-state">
+            <div v-if="filteredFriends.length || 0 === 0" class="empty-state">
                 <p>검색 결과가 없습니다.</p>
             </div>
         </div>
@@ -85,7 +85,7 @@
     });
 
 // store 데이터 참조
-    const friends = computed(() => friendsStore.friend_list);
+    const friends = computed(() => friendsStore.friend_list || []);
 
 // 검색 필터
     const filteredFriends = computed(() => {
