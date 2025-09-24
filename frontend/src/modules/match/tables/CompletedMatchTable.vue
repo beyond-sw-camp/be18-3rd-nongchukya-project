@@ -52,7 +52,7 @@
           v-if="isCancellable(m.matchDate)" 
           type="button" 
           class="btn-cancel" 
-          @click="$emit('cancel-click', m.id)">
+          @click="$emit('cancel-click', m.id,  m.roomId)">
           <i class="mdi mdi-close"></i> 취소
         </button>
         

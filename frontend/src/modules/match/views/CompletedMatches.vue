@@ -16,10 +16,8 @@ import { useRoute, useRouter, onBeforeRouteUpdate } from 'vue-router';
 import { useMatchStore } from '../stores/matchStore';
 import CompletedMatchTable from '../tables/CompletedMatchTable.vue';
 import PageNation from '../common/PageNation.vue';
-import { useMatchApplicationStore } from '../stores/matchApplicationStore';
 
   const matchStore = useMatchStore();
-  const matchApplicationStore = useMatchApplicationStore();
   const currentRoute = useRoute();
   const router = useRouter();
 
@@ -50,15 +48,21 @@ import { useMatchApplicationStore } from '../stores/matchApplicationStore';
     }
   });
 
-  const cancelClick = async (no) => {
+  const cancelClick = async (matchId, roomId) => {
     try {
+      console.log(matchId);
+      console.log(roomId);
+      
+      
+
       if(confirm('정말로 취소하시겠습니까?')) {
-        const result = await matchApplicationStore.cancelMatchApplication(no);
+      const result = await matchStore.cancelCompletedMatch(matchId, roomId);
+        
 
       if(result.code === 200) {
         alert('정상적으로 취소되었습니다.');
 
-        await matchApplicationStore.fetchMatchApplications(matchApplicationStore.pageInfo.currentPage, 10);
+        await matchStore.fetchCompletedMatches(matchStore.pageInfo.currentPage, 10);
       }
     }
     } catch (error) {
