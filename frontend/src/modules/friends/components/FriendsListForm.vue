@@ -119,7 +119,7 @@
 // 친구 삭제
     const deleteFriend = async (userId) => {
         try {
-            if (confirm('정말로 삭제하시겠습니까?')) {
+            if (confirm('해당 친구를 정말로 삭제하시겠습니까?')) {
                 const result = await friendsStore.deleteFriend(userId);
 
                 if (result.code === 200) {
