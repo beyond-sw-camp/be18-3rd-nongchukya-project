@@ -12,9 +12,18 @@
 
     const friensStore = useFriendsStore();
 
-    onMounted(async () => {
-        await friensStore.getFriendsList();
-    });
+    try{
+        onMounted(async () => {
+            await friensStore.getFriendsList();
+        });
+    } catch(error) {
+        const {status, message} = error.response.data;
+        if(status === 'FRIEND_LIST_NOT_FOUND') {
+            alert(message);
+        }else if(status === 'UNAUTHORIZED') {
+            alert(message);
+        }
+    }
     
 </script>
 

@@ -86,16 +86,36 @@
 
     const filteredUsers = computed(() => users.value);
 
-    const sendFriendRequest = async (userId) => {
-        const result = await friendRequestsStore.sendFriendRequest(userId);
+const sendFriendRequest = async (userId) => {
+        try{
+            const result = await friendRequestsStore.sendFriendRequest(userId);
 
-        if (result.code === 200) {
-            alert('친구 요청을 보냈습니다.');
-            
-            if (searchQuery.value.trim()) {
-                await usersStore.getSearchUsersByNickname(searchQuery.value);
+            if (result.code === 200) {
+                alert('친구 요청을 보냈습니다.');
+                
+                if (searchQuery.value.trim()) {
+                    await usersStore.getSearchUsersByNickname(searchQuery.value);
+                }
+            };
+        }catch(error) {
+            const res = error.response?.data;
+            if (!res) {
+                alert("서버와의 통신에 실패했습니다.");
+            console.error(error);
+            return;
+            } 
+
+            const {status, message} = res;
+            if(status === 'UNAUTHORIZED') {
+                alert(message);
+            }else if(status === 'ALREADY_RECEIVED_REQUEST') {
+                alert(message);
+            }else if(status === 'USER_NOT_FOUND') {
+                alert(message);
+            }else {
+                alert("알 수 없는 오류가 발생했습니다.");
             }
-        };
+        }  
     }
 </script>
 
