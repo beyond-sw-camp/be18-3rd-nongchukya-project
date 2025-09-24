@@ -81,6 +81,7 @@ export const useNotificationStore = defineStore('notifications', {
       es.addEventListener('toggle-like', onNew)
       es.addEventListener('post-commented', onNew)
       es.addEventListener('comment-replied', onNew)
+      es.addEventListener('request-match-result', onNew)
 
       es.onerror = () => {
         this.connected = false
