@@ -11,13 +11,12 @@
 
       <!-- 가운데: 탭 -->
       <div class="nav-center">
-        
         <!-- Match 탭 -->
         <router-link :to="{name: 'matchApplication/add'}" class="tab">Match</router-link>
 
         <!-- Match List 탭 -->
         <div class="tab dropdown-parent">
-          <router-link to="/" class="tab-link">Match</router-link>
+          <router-link to="/" class="tab-link">Match List</router-link>
           <div class="dropdown">
             <router-link :to="{name: 'matches'}">매칭 중 조회</router-link>
             <router-link :to="{name: 'completedMatches'}">완료된 매칭 조회</router-link>
@@ -37,23 +36,29 @@
 
       <!-- 오른쪽: 로그인 상태별 -->
       <div class="nav-right">
+        <!-- 알림 아이콘 -->
         <router-link v-if="isLogin" to="/notification" class="icon-btn" title="알림">
           <i class="mdi mdi-bell-outline"></i>
-          <span v-if="bootstrapped " class="badge">{{ unreadCount }}</span>
+          <span v-if="bootstrapped" class="badge">{{ unreadCount }}</span>
         </router-link>
 
+        <!-- 채팅 아이콘 -->
         <router-link v-if="isLogin" to="/chatrooms/list" class="icon-btn" title="MYCHATPAGE">
           <i class="mdi mdi-send-outline"></i>
         </router-link>
 
-        <router-link v-if="isLogin" to="/mypage" class="icon-btn" title="마이페이지">
-          <i class="mdi mdi-account-circle-outline"></i>
-        </router-link>
+        <!-- 마이페이지 + 닉네임 + 로그아웃 -->
+        <div v-if="isLogin" class="mypage-hover-area">
+          <span class="nickname">{{ nickname }}</span>
+          <router-link to="/mypage" class="icon-btn" title="마이페이지">
+            <i class="mdi mdi-account-circle-outline"></i>
+          </router-link>
+          <button class="text-btn logout logout-hover-btn" @click="doLogout">
+            로그아웃
+          </button>
+        </div>
 
-        <button v-if="isLogin" class="text-btn logout" @click="doLogout">
-          로그아웃
-        </button>
-
+        <!-- 비로그인 상태 -->
         <template v-else>
           <router-link to="/Signup" class="text-btn">회원가입</router-link>
           <router-link to="/Login" class="text-btn">로그인</router-link>
@@ -66,44 +71,48 @@
 <script setup>
 import api from "@/api/axios"
 import { useNotificationStore } from "@/stores/notifications"
-import { storeToRefs } from 'pinia'
-import { onMounted, ref } from 'vue'
+import { storeToRefs } from "pinia"
+import { onMounted, ref } from "vue"
 import { useRouter } from "vue-router"
 
 const router = useRouter()
-const notif = useNotificationStore();
-const { unreadCount, bootstrapped } = storeToRefs(notif);
+const notif = useNotificationStore()
+const { unreadCount, bootstrapped } = storeToRefs(notif)
 
-const isLogin = ref(false);
+const isLogin = ref(false)
+const nickname = ref("")
 
-    onMounted(() => {
-      const token = localStorage.getItem("accessToken");
-      if(token) {
-        isLogin.value = true;
-      }
-    });
-    async function doLogout() {
-      try {
-        await api.post("/api/v1/auth/logout") // 쿠키도 서버에서 만료됨
+onMounted(() => {
+  const token = localStorage.getItem("accessToken")
+  if (token) {
+    isLogin.value = true
+    nickname.value = localStorage.getItem("nickname") || ""
+  }
+})
 
-        localStorage.removeItem("accessToken") // accessToken만 제거
-        useNotificationStore().resetState()
+async function doLogout() {
+  try {
+    await api.post("/api/v1/auth/logout") // 쿠키도 서버에서 만료됨
 
-        isLogin.value = false
+    localStorage.removeItem("accessToken")
+    localStorage.removeItem("refreshToken")
+    localStorage.removeItem("nickname") 
+    useNotificationStore().resetState()
 
-        alert("로그아웃 되었습니다.")
-        router.push('/');
-      } catch (err) {
-        console.error("❌ 로그아웃 실패:", err.response?.data || err.message)
-        alert("로그아웃 실패: " + (err.response?.data?.message || err.message))
-      }
-    }
+    isLogin.value = false
+    nickname.value = ""
 
+    alert("로그아웃 되었습니다.")
+    router.push("/")
+  } catch (err) {
+    console.error("로그아웃 실패:", err.response?.data || err.message)
+    alert("로그아웃 실패: " + (err.response?.data?.message || err.message))
+  }
+}
 </script>
 
-
 <style scoped>
-/* 레이아웃 */
+/* ===== 공통 레이아웃 ===== */
 .header {
   background: #fff;
   border-bottom: 1px solid #e9e9e9;
@@ -115,7 +124,8 @@ const isLogin = ref(false);
   padding: 0 20px;
   justify-content: space-between;
 }
-.nav-left, .nav-right {
+.nav-left,
+.nav-right {
   display: flex;
   align-items: center;
   gap: 18px;
@@ -127,7 +137,7 @@ const isLogin = ref(false);
   position: relative;
 }
 
-/* 로고 */
+/* ===== 로고 ===== */
 .logo-link {
   display: inline-flex;
   align-items: center;
@@ -138,28 +148,32 @@ const isLogin = ref(false);
   object-fit: contain;
 }
 
-/* 탭 메뉴 */
-.tab-link, .tab {
+/* ===== 탭 메뉴 ===== */
+.tab-link,
+.tab {
   font-weight: 700;
   color: #111;
   text-decoration: none;
   padding: 8px 14px;
   position: relative;
 }
-.tab-link:hover, .tab:hover { color: #000; }
+.tab-link:hover,
+.tab:hover {
+  color: #000;
+}
 
-/* 드롭다운 */
+/* ===== 드롭다운 ===== */
 .dropdown-parent {
   position: relative;
 }
 .dropdown {
   display: none;
   position: absolute;
-  top: 100%; /* 탭 바로 밑 */
+  top: 100%;
   left: 0;
   background: #fff;
   border: 1px solid #ddd;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   flex-direction: column;
   min-width: 180px;
   z-index: 1000;
@@ -178,7 +192,7 @@ const isLogin = ref(false);
   display: flex;
 }
 
-/* 아이콘 버튼 */
+/* ===== 아이콘 버튼 ===== */
 .icon-btn {
   position: relative;
   display: inline-flex;
@@ -193,9 +207,11 @@ const isLogin = ref(false);
   font-size: 22px;
   line-height: 1;
 }
-.icon-btn:hover { opacity: 0.8; }
+.icon-btn:hover {
+  opacity: 0.8;
+}
 
-/* 알림 배지 */
+/* ===== 알림 배지 ===== */
 .badge {
   position: absolute;
   top: -4px;
@@ -213,7 +229,7 @@ const isLogin = ref(false);
   justify-content: center;
 }
 
-/* 텍스트 버튼 */
+/* ===== 텍스트 버튼 ===== */
 .text-btn {
   background: transparent;
   border: none;
@@ -223,6 +239,50 @@ const isLogin = ref(false);
   cursor: pointer;
   text-decoration: none;
 }
-.text-btn:hover { opacity: 0.8; }
-.logout { color: #d12; }
+.text-btn:hover {
+  opacity: 0.8;
+}
+
+/* ===== 마이페이지 hover 시 로그아웃 버튼 ===== */
+.mypage-hover-area {
+  position: relative;
+  display: inline-block;
+  margin-right: 15px;
+}
+.logout-hover-btn {
+  display: none;
+  position: absolute;
+  top: 110%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #f5f5f5;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 20px;
+  min-width: 100px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #333;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  z-index: 100;
+}
+.logout-hover-btn:hover,
+.logout-hover-btn:focus {
+  background: #e53935;
+  color: #fff;
+  transform: translateX(-50%) translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
+}
+.mypage-hover-area:hover .logout-hover-btn,
+.logout-hover-btn:focus {
+  display: block;
+}
+
+.nickname {
+  margin-right: 8px;
+  font-weight: 700;
+  color: #333;
+}
 </style>

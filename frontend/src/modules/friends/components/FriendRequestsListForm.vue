@@ -115,36 +115,98 @@
     };
 
     const deleteSentFriendRequests = async (userId) => {
-        if (confirm('정말로 삭제하시겠습니까?')) {
-            const result = await friendRequestsStore.deleteSentFriendRequests(userId);
+        try{
+            if (confirm('정말로 삭제하시겠습니까?')) {
+                const result = await friendRequestsStore.deleteSentFriendRequests(userId);
 
-            if (result.code === 200) {
-                alert('정상적으로 삭제되었습니다.');
+                if (result.code === 200) {
+                    alert('정상적으로 삭제되었습니다.');
 
-                await friendRequestsStore.getSentFriendRequests();
+                    await friendRequestsStore.getSentFriendRequests();
+                };
             };
-        };
+        } catch(error) {
+            const res = error.response?.data;
+            if (!res) {
+            alert("서버와의 통신에 실패했습니다.");
+            console.error(error);
+            return;
+            }
+
+            const {status, message} = res;
+            if(status === 'UNAUTHORIZED') {
+                alert(message);
+            }else if(status === 'REQUEST_NOT_FOUND') {
+                alert(message);
+            }else if(status === 'USER_NOT_FOUND') {
+                alert(message);
+            }else {
+                alert("알 수 없는 오류가 발생했습니다.");
+            }
+        } 
     };
 
     const deleteReceivedFriendRequests = async (userId) => {
-        if (confirm('정말로 삭제하시겠습니까?')) {
-            const result = await friendRequestsStore.deleteReceivedFriendRequests(userId);
+        try{
+            if (confirm('정말로 삭제하시겠습니까?')) {
+                const result = await friendRequestsStore.deleteReceivedFriendRequests(userId);
 
-            if (result.code === 200) {
-                alert('정상적으로 삭제되었습니다.');
+                if (result.code === 200) {
+                    alert('정상적으로 삭제되었습니다.');
 
-                await friendRequestsStore.getReceivedFriendRequests();
+                    await friendRequestsStore.getReceivedFriendRequests();
+                };
             };
-        };
+        } catch(error) {
+            const res = error.response?.data;
+            if (!res) {
+                alert("서버와의 통신에 실패했습니다.");
+            console.error(error);
+            return;
+            } 
+
+            const {status, message} = res;
+            if(status === 'UNAUTHORIZED') {
+                alert(message);
+            }else if(status === 'REQUEST_NOT_FOUND') {
+                alert(message);
+            }else if(status === 'USER_NOT_FOUND') {
+                alert(message);
+            }else {
+                alert("알 수 없는 오류가 발생했습니다.");
+            }
+        } 
     };
 
     const acceptReceivedFriendRequests = async (userId) => {
-        const result = await friendRequestsStore.acceptReceivedFriendRequests(userId);
-        console.log(result);
-        if (result.code === 200) {
-                alert('친구가 추가되었습니다.');
-                await friendRequestsStore.getReceivedFriendRequests();
+        try{
+            const result = await friendRequestsStore.acceptReceivedFriendRequests(userId);
+            console.log(result);
+            if (result.code === 200) {
+                    alert('친구가 추가되었습니다.');
+                    await friendRequestsStore.getReceivedFriendRequests();
             };
+        } catch(error) {
+            const res = error.response?.data;
+            if (!res) {
+                alert("서버와의 통신에 실패했습니다.");
+                console.error(error);
+                return;
+            }
+
+            const {status, message} = res;
+            if(status === 'UNAUTHORIZED') {
+                alert(message);
+            }else if(status === 'REQUEST_NOT_FOUND') {
+                alert(message);
+            }else if(status === 'USER_NOT_FOUND') {
+                alert(message);
+            }else if(status === 'ALREADY_FRIEND') {
+                alert(message);
+            }else {
+                alert("알 수 없는 오류가 발생했습니다.");
+            }
+        }
     };
 
 </script>
