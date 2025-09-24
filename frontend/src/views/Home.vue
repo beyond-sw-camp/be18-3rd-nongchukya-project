@@ -1,17 +1,28 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
-    <div class="home-page">
-      <DateSelector 
-        @date-selected="handleDateSelected"/>
-      <ImminentMatches
-        :imminentMatches="matchStore.imminentMatches"
-        @apply-click="handleApplyClick"/>
-      <DailyMatches
-        :dailyMatches="matchStore.dailyMatches"
-        @apply-click="handleApplyClick" 
-        @change-page="changePage"/>
+  <div class="home-page">
+    <DateSelector @date-selected="handleDateSelected" />
+    <ImminentMatches
+      :imminentMatches="matchStore.imminentMatches"
+      @apply-click="handleApplyClick"
+    />
+
+    <!-- dailyMatches가 비어있을 때 -->
+    <div v-if="matchStore.dailyMatches.length === 0" class="no-matches">
+      <img src="@/assets/pokemon(1).png" alt="경기 없음" />
+      <p>아직 등록된 경기가 없습니다.</p>
     </div>
+
+    <!-- dailyMatches가 있을 때 -->
+    <DailyMatches
+      v-else
+      :dailyMatches="matchStore.dailyMatches"
+      @apply-click="handleApplyClick"
+      @change-page="changePage"
+    />
+  </div>
 </template>
+
 
 <script setup>
 import DailyMatches from '@/modules/match/components/DailyMatches.vue';
@@ -107,9 +118,33 @@ import { useRoute, useRouter } from 'vue-router';
 </script>
 
 <style scoped>
-
 .home-page {
   margin-left: 4em;
   margin-right: 4em;
+  margin-top: 2em;
+}
+
+/* 없을 때 보여줄 박스 */
+.no-matches {
+  margin-top: 4rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 이미지 크기 */
+.no-matches img {
+  max-width: 150px;
+  opacity: 0.9;
+  margin-bottom: 1rem;
+}
+
+/* 텍스트 */
+.no-matches p {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #555;
 }
 </style>
+
