@@ -26,7 +26,7 @@
                 <div class="profile-section">
                     <div class="profile-image-container">
                         <img
-                            :src="friendRequest.profileImage || defaultProfileImage"
+                            :src="resolveProfileImage(friendRequest.profileImage)"
                             :alt="`${friendRequest.nickname} 프로필`"
                             class="profile-image"
                         />

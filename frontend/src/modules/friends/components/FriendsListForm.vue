@@ -72,6 +72,7 @@
     import { ref, computed, onMounted } from "vue";
     import { useFriendsStore } from "../stores/friendsStore";
     import api from "@/api/axios";
+    import defaultProfile from '@/assets/default_profile.png'
     import { useRouter } from "vue-router";
 
     const friendsStore = useFriendsStore();
@@ -97,7 +98,7 @@
     // ✅ 프로필 이미지 경로 처리 함수
     function resolveProfileImage(path) {
         if (!path) {
-            return 'https://via.placeholder.com/100x100?text=Profile'
+            return defaultProfile
         }
         if (path.startsWith('http')) {
             return path
