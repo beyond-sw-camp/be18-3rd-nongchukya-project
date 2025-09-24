@@ -28,7 +28,7 @@
                 <div class="profile-section">
                     <div class="profile-image-container">
                         <img
-                            :src="friend.profileImage || defaultProfileImage"
+                            :src="resolveProfileImage(friend.profileImage)"
                             :alt="`${friend.nickname} 프로필`"
                             class="profile-image"
                         />
@@ -70,7 +70,6 @@
 
 <script setup>
     import { ref, computed, onMounted } from "vue";
-    import defaultProfileImage from "@/assets/default_profile.png"
     import { useFriendsStore } from "../stores/friendsStore";
     import api from "@/api/axios";
     import { useRouter } from "vue-router";
@@ -94,6 +93,17 @@
         f.nickname.includes(searchQuery.value.trim())
         );
     });
+
+    // ✅ 프로필 이미지 경로 처리 함수
+    function resolveProfileImage(path) {
+        if (!path) {
+            return 'https://via.placeholder.com/100x100?text=Profile'
+        }
+        if (path.startsWith('http')) {
+            return path
+        }
+        return `http://localhost:8080${path}`
+    }
 
 // 날짜 포맷
     const formatFriendDate = (dateString) => {
