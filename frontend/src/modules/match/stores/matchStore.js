@@ -28,10 +28,6 @@ export const useMatchStore = defineStore('match', () => {
   const fetchCompletedMatches = async (page, numOfRows) => {
     const response = await api.get('/api/v1/match-service/completed-matches');
 
-    console.log(response.data);
-    console.log(response.data.items);
-    
-
     completedMatches.value = response.data.items;
     pageInfo.totalCount = response.data.totalCount;
     pageInfo.listLimit = numOfRows;  

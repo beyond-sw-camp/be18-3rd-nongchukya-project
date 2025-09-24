@@ -58,6 +58,7 @@ import PageNation from '../common/PageNation.vue';
         alert('정상적으로 취소되었습니다.');
 
         await matchStore.fetchCompletedMatches(matchStore.pageInfo.currentPage, 10);
+        await matchStore.fetchMatches(matchStore.pageInfo.currentPage, 10);
       }
     }
     } catch (error) {
