@@ -26,7 +26,7 @@
                 <div class="profile-section">
                     <div class="profile-image-container">
                         <img
-                            :src="friendRequest.profileImage || defaultProfileImage"
+                            :src="resolveProfileImage(friendRequest.profileImage)"
                             :alt="`${friendRequest.nickname} 프로필`"
                             class="profile-image"
                         />
@@ -59,7 +59,7 @@
                 <div class="profile-section">
                     <div class="profile-image-container">
                         <img
-                            :src="friendRequest.profileImage || defaultProfileImage"
+                            :src="resolveProfileImage(friendRequest.profileImage)"
                             :alt="`${friendRequest.nickname} 프로필`"
                             class="profile-image"
                         />
@@ -88,8 +88,8 @@
 
 <script setup>
     import { ref, computed } from 'vue';
-    import defaultProfileImage from "@/assets/default_profile.png";
     import { useFriendRequestsStore } from '../stores/friendRequestsStore';
+    import defaultProfile from '@/assets/default_profile.png'
 
     const props = defineProps({
         receivedRequests: { type: Array, default: () => [] },
@@ -113,6 +113,17 @@
             day: "numeric",
         });
     };
+
+        // ✅ 프로필 이미지 경로 처리 함수
+    function resolveProfileImage(path) {
+        if (!path) {
+            return defaultProfile
+        }
+        if (path.startsWith('http')) {
+            return path
+        }
+        return `http://localhost:8080${path}`
+    }
 
     const deleteSentFriendRequests = async (userId) => {
         try{
