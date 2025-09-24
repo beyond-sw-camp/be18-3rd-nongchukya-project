@@ -1,7 +1,5 @@
 <template>
   <div class="matching-section">
-    <h2>매칭 중 경기</h2>
-
     <div v-if="matches.length === 0">진행 중인 매치가 없습니다.</div>
 
     <div v-else>
@@ -11,7 +9,7 @@
         <p v-if="match.opponentNickname"><strong>상대:</strong> {{ match.opponentNickname }}</p>
 
         <p v-if="match.matchDate || match.matchTime">
-          <strong>일정:</strong> {{ formatDate(match.matchDate) }} {{ match.matchTime || '' }}
+          <strong>경기 일시:</strong> {{ formatDate(match.matchDate) }} {{ match.matchTime || '' }}
         </p>
 
         <p><strong>장소:</strong> {{ match.region }}</p>
@@ -75,7 +73,14 @@ onMounted(() => {
 })
 
 // 날짜 포맷 함수
-const formatDate = isoStr => new Date(isoStr).toLocaleString()
+const formatDate = isoStr => {
+  const date = new Date(isoStr)
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+
+  return `${year}-${month}-${day}`
+}
 </script>
 
 <style scoped>

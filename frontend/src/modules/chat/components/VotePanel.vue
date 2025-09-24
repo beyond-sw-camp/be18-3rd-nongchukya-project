@@ -10,7 +10,7 @@
         <v-list-item-title>투표 만들기</v-list-item-title>
       </v-list-item>
       <v-list-item @click="openVoteList">
-        <v-list-item-title>진행 중 투표</v-list-item-title>
+        <v-list-item-title>투표 목록</v-list-item-title>
       </v-list-item>
       <v-list-item disabled>
         <v-list-item-title>파일 첨부 (준비중)</v-list-item-title>

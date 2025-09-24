@@ -12,15 +12,15 @@
       <!-- 가운데: 탭 -->
       <div class="nav-center">
         <!-- Match 탭 -->
-        <router-link :to="{name: 'matchApplication/add'}" class="tab">Match</router-link>
+        <router-link :to="{name: 'matchApplication/add'}" class="tab">Quick Match</router-link>
 
         <!-- Match List 탭 -->
         <div class="tab dropdown-parent">
-          <router-link to="/" class="tab-link">Match List</router-link>
+          <router-link to="/" class="tab-link">My Match List</router-link>
           <div class="dropdown">
-            <router-link :to="{name: 'matches'}">매칭 중 조회</router-link>
-            <router-link :to="{name: 'completedMatches'}">완료된 매칭 조회</router-link>
-            <router-link :to="{name: 'matchApplications'}">매칭 신청 이력 조회</router-link>
+            <router-link :to="{name: 'matches'}">매칭 대기</router-link>
+            <router-link :to="{name: 'completedMatches'}">성사된 매칭</router-link>
+            <router-link :to="{name: 'matchApplications'}">매칭 신청 이력</router-link>
           </div>
         </div>
 

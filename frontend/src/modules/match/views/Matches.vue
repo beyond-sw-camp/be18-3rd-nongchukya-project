@@ -58,7 +58,7 @@ import { useMatchApplicationStore } from '../stores/matchApplicationStore';
       if(result.code === 200) {
         alert('정상적으로 취소되었습니다.');
 
-        await matchApplicationStore.fetchMatchApplications(matchApplicationStore.pageInfo.currentPage, 10);
+        await matchStore.fetchMatches(matchStore.pageInfo.currentPage, 10);
       }
     }
     } catch (error) {
