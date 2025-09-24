@@ -18,7 +18,7 @@
         </div>
 
             <!-- 친구 카드 -->
-        <p class="subtitle">{{ friendsStore.friend_list.length || 0 }}명의 친구</p>
+        <p class="subtitle">{{ (friendsStore.friend_list?.length) ?? 0 }}명의 친구</p>
         <div class="friends-grid">
             <div
                 v-for="friend in filteredFriends"
@@ -28,7 +28,7 @@
                 <div class="profile-section">
                     <div class="profile-image-container">
                         <img
-                            :src="friend.profileImage || defaultProfileImage"
+                            :src="resolveProfileImage(friend.profileImage)"
                             :alt="`${friend.nickname} 프로필`"
                             class="profile-image"
                         />
@@ -61,7 +61,7 @@
         </div>
 
         <!-- 검색 결과 없음 -->
-            <div v-if="filteredFriends.length || 0 === 0" class="empty-state">
+            <div v-if="(filteredFriends?.length ?? 0) === 0" class="empty-state">
                 <p>검색 결과가 없습니다.</p>
             </div>
         </div>
@@ -70,9 +70,9 @@
 
 <script setup>
     import { ref, computed, onMounted } from "vue";
-    import defaultProfileImage from "@/assets/default_profile.png"
     import { useFriendsStore } from "../stores/friendsStore";
     import api from "@/api/axios";
+    import defaultProfile from '@/assets/default_profile.png'
     import { useRouter } from "vue-router";
 
     const friendsStore = useFriendsStore();
@@ -94,6 +94,17 @@
         f.nickname.includes(searchQuery.value.trim())
         );
     });
+
+    // ✅ 프로필 이미지 경로 처리 함수
+    function resolveProfileImage(path) {
+        if (!path) {
+            return defaultProfile
+        }
+        if (path.startsWith('http')) {
+            return path
+        }
+        return `http://localhost:8080${path}`
+    }
 
 // 날짜 포맷
     const formatFriendDate = (dateString) => {

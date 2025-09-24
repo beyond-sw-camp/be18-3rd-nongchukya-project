@@ -24,7 +24,7 @@
                     <div class="profile-section">
                         <div class="profile-image-container">
                             <img
-                                :src="user.profileImage || defaultProfileImage"
+                                :src="resolveProfileImage(user.profileImage)"
                                 :alt="`${user.nickname} 프로필`"
                                 class="profile-image"
                             />
@@ -49,7 +49,7 @@
     import { ref, computed, onMounted, watch } from "vue";
     import { useUsersStore } from "../stores/usersStore";
     import { useFriendRequestsStore } from "../stores/friendRequestsStore";
-    import defaultProfileImage from "@/assets/default_profile.png"
+    import defaultProfile from '@/assets/default_profile.png' 
     import { useRoute } from "vue-router";
 
     const usersStore = useUsersStore();
@@ -70,12 +70,22 @@
         }
     });
 
+       // ✅ 프로필 이미지 경로 처리 함수
+    function resolveProfileImage(path) {
+        if (!path) {
+            return defaultProfile
+        }
+        if (path.startsWith('http')) {
+            return path
+        }
+        return `http://localhost:8080${path}`
+    }
+
     watch(
         () => route.fullPath,
         () => {
             usersStore.clearUsers();
             searchQuery.value = "";
-            console.log(users);
         }
     );
 
