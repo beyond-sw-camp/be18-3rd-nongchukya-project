@@ -42,13 +42,20 @@
       <!-- 하단: 취소 버튼 우하단 정렬 -->
       <div class="foot">
         <button
-          v-if="isCancellable(m.matchDate)"
+          v-if="isResultRecordable(m.matchDate)"
           type="button"
-          class="btn-cancel"
-          @click="$emit('cancel-click', m.id, m.roomId)"
-        >
+          class="btn-add-result"
+          @click="$emit('add-result-click', m.id)">
+          <i class="mdi mdi-file-document-outline"></i> 결과 등록
+        </button>
+        <button 
+          v-if="isCancellable(m.matchDate)" 
+          type="button" 
+          class="btn-cancel" 
+          @click="$emit('cancel-click', m.id,  m.roomId)">
           <i class="mdi mdi-close"></i> 취소
         </button>
+        
       </div>
     </div>
 
@@ -57,22 +64,32 @@
 </template>
 
 <script setup>
-const props = defineProps({
-  completedMatches: { type: Array, required: true }
-})
-const emit = defineEmits(['cancel-click'])
+  defineProps({
+    completedMatches: { type: Array, required: true }
+  })
 
-const getGenderText = (g) => {
-  if (g === 'A') return '상관없음'
-  if (g === 'F') return '여자만'
-  if (g === 'M') return '남자만'
-  return g
-}
+  defineEmits(['cancel-click', 'add-result-click'])
 
-const isCancellable = (dateString) => {
-  const today = new Date(); today.setHours(0,0,0,0)
-  const md = new Date(dateString)
-  return md >= today
+  const getGenderText = (g) => {
+    if (g === 'A') return '상관없음'
+    if (g === 'F') return '여자만'
+    if (g === 'M') return '남자만'
+    return g
+  }
+
+  const isCancellable = (dateString) => {
+    const today = new Date(); today.setHours(0,0,0,0)
+    const md = new Date(dateString)
+    return md >= today
+  }
+
+  const isResultRecordable = (dateString) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); 
+    const matchDate = new Date(dateString);
+    matchDate.setHours(0, 0, 0, 0); 
+
+    return today > matchDate;
 }
 </script>
 
@@ -126,17 +143,26 @@ const isCancellable = (dateString) => {
 /* 구분선 */
 .divider{ height:1px; background:#e5e7eb; margin:12px 0; }
 
-/* 하단 취소 버튼 우측 정렬 */
-.foot{ display:flex; justify-content:flex-end; }
-.btn-cancel{
-  display:inline-flex; align-items:center; gap:6px;
-  border:1px solid #e5e7eb; background:#ef4444; color:#fff;
-  border-radius:12px; padding:8px 14px; font-size:14px; cursor:pointer;
-}
-.btn-cancel:hover{ filter:brightness(.95); }
-
 /* 제목 */
 .section-title{ font-size:20px; font-weight:800; margin:6px 0 8px; }
 
 .empty{ padding:20px; text-align:center; color:#6b7280; }
+
+/* 하단 버튼 우측 정렬 */
+.foot{ display:flex; justify-content:flex-end; gap: 8px; }
+.btn-cancel, .btn-add-result {
+  display:inline-flex; align-items:center; gap:6px;
+  border:1px solid #e5e7eb;
+  border-radius:12px; padding:8px 14px; font-size:14px; cursor:pointer;
+}
+
+.btn-cancel {
+  background:#ef4444; color:#fff;
+}
+.btn-cancel:hover{ filter:brightness(.95); }
+
+.btn-add-result {
+  background: #3b82f6; color: #fff;
+}
+.btn-add-result:hover { filter:brightness(.95); }
 </style>

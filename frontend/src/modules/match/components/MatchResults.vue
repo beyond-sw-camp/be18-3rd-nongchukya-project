@@ -41,14 +41,7 @@
     }
   })
 
-  defineEmits(['cancel-click'])
-
-  const getGenderText = (g) => {
-    if (g === 'A') return '상관없음'
-    if (g === 'F') return '여자만'
-    if (g === 'M') return '남자만'
-    return g
-  }
+  defineEmits(['cancel-click']);
 </script>
 
 <style lang="scss" scoped>

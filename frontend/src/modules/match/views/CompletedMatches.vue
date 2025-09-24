@@ -2,7 +2,8 @@
   <main class="common-back">
     <completed-match-table 
       :completedMatches="matchStore.completedMatches"
-      @cancel-click="cancelClick"/>
+      @cancel-click="cancelClick"
+      @add-result-click="addResultClick"/>
     <page-nation 
       :page-info="matchStore.pageInfo"
       @change-page="changePage"/>
@@ -76,6 +77,10 @@ import PageNation from '../common/PageNation.vue';
         alert('에러가 발생했습니다.')
       }
     }
+  };
+
+  const addResultClick = (matchId) => {
+    router.push({ name: 'addMatchResult', params: { matchId } });
   };
 
   onBeforeRouteUpdate(async (to) => {

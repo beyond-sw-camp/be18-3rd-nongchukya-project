@@ -10,16 +10,51 @@
 
     <!-- 프로필 편집 모드 -->
     <div v-if="editProfileMode" class="edit-form">
-      <input v-model="editableData.name" placeholder="이름" />
-      <input v-model="editableData.email" placeholder="이메일" />
-      <input v-model="editableData.phone" placeholder="전화번호" />
-      <input v-model="editableData.address" placeholder="주소" />
-      <input v-model="editableData.age" placeholder="나이" type="number" />
-      <button @click="saveProfile">저장</button>
+      <div class="edit-form-inner">
+        <div class="profile-img-edit">
+          <!-- ✅ 프로필 이미지 표시 부분 수정 -->
+          <img
+            :src="resolveProfileImage(editableData.profileImage)"
+            class="profile-img-preview"
+            alt="프로필 이미지"
+          />
+          <label class="profile-upload-btn">
+            프로필 사진 변경
+            <input type="file" accept="image/*" @change="handleProfileImage" hidden />
+          </label>
+        </div>
+        <div class="edit-fields">
+          <label>이름
+            <input v-model="editableData.name" placeholder="이름을 입력하세요." />
+          </label>
+          <label>이메일
+            <input v-model="editableData.email" placeholder="이메일을 입력하세요." />
+          </label>
+          <label>전화번호
+            <input v-model="editableData.phone" placeholder="전화번호를 입력하세요." />
+          </label>
+          <label>주소
+            <input v-model="editableData.address" placeholder="주소를 입력하세요." />
+          </label>
+          <label>나이
+            <input v-model="editableData.age" placeholder="나이를 입력하세요." type="number" />
+          </label>
+        </div>
+        <button class="save-btn" @click="saveProfile">저장</button>
+      </div>
     </div>
 
     <!-- 기본 정보 모드 -->
     <div class="basic-info" v-else>
+      <!-- ✅ 기본 모드에서도 프로필 사진 표시 -->
+      <div class="profile-img-view">
+        <img
+          :src="resolveProfileImage(editableData.profileImage)"
+          class="profile-img-preview"
+          alt="프로필 이미지"
+        />
+      </div>
+
       <p><strong>이름:</strong> {{ editableData.name || '-' }}</p>
       <p><strong>이메일:</strong> {{ editableData.email || '-' }}</p>
       <p><strong>전화번호:</strong> {{ editableData.phone || '미등록' }}</p>
@@ -95,6 +130,17 @@ const levelOptions = [
   { id: 2, name: 'Intermediate' },
   { id: 3, name: 'Advanced' }
 ]
+
+// ✅ 프로필 이미지 경로 처리 함수
+function resolveProfileImage(path) {
+  if (!path) {
+    return 'https://via.placeholder.com/100x100?text=Profile'
+  }
+  if (path.startsWith('http')) {
+    return path
+  }
+  return `http://localhost:8080${path}`
+}
 
 // 초기 데이터 세팅
 const initLevels = (userLevels) => {
@@ -184,8 +230,18 @@ const saveLevels = async () => {
 }
 </script>
 
+
 <style scoped>
-.profile-section { margin-top: 1rem; }
+.profile-section {
+  margin-top: 2.5rem;
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px 0 rgba(0,0,0,0.08);
+  padding: 2.5rem 2rem 2rem 2rem;
+}
 .profile-header {
   display: flex;
   justify-content: space-between;
@@ -200,23 +256,95 @@ const saveLevels = async () => {
   font-weight: 600;
   font-size: 1.25rem;
 }
-.edit-form input,
-.edit-form select {
-  display: block;
-  margin: 0.3rem 0;
-  padding: 0.4rem 0.6rem;
-  width: 100%;
-  border-radius: 6px;
-  border: 1px solid #d1d5db;
+.edit-form {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 420px;
 }
-.edit-form button {
-  margin-top: 0.5rem;
-  padding: 0.4rem 0.8rem;
-  background-color: #10b981;
-  color: white;
-  border: none;
-  border-radius: 6px;
+.edit-form-inner {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+.profile-img-edit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+.profile-img-preview {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e5e7eb;
+  background: #f3f4f6;
+}
+.profile-upload-btn {
+  display: inline-block;
+  margin-top: 0.3rem;
+  padding: 0.4rem 1.1rem;
+  background: #f3f4f6;
+  color: #1d61e7;
+  border-radius: 8px;
+  font-size: 0.97rem;
+  font-weight: 600;
   cursor: pointer;
+  border: 1px solid #e5e7eb;
+  transition: background 0.18s, color 0.18s;
+}
+.profile-upload-btn:hover {
+  background: #e3edff;
+  color: #174bb3;
+}
+.edit-fields {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+.edit-fields label {
+  font-size: 0.97rem;
+  color: #222;
+  font-weight: 500;
+  margin-bottom: 0.2rem;
+}
+.edit-fields input {
+  width: 100%;
+  padding: 0.7rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background: #fafbfc;
+  font-size: 1rem;
+  margin-top: 0.2rem;
+  transition: border 0.2s, box-shadow 0.2s;
+  outline: none;
+  box-sizing: border-box;
+}
+.edit-fields input:focus {
+  border: 1.5px solid #1D61E7;
+  background: #fff;
+  box-shadow: 0 0 0 2px #e3edff;
+}
+.save-btn {
+  margin-top: 1.2rem;
+  padding: 0.7rem 2.2rem;
+  background: #1D61E7;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.08rem;
+  font-weight: 700;
+  box-shadow: 0 2px 8px 0 rgba(29,97,231,0.08);
+  transition: background 0.18s, box-shadow 0.18s;
+  cursor: pointer;
+}
+.save-btn:hover {
+  background: #174bb3;
+  box-shadow: 0 4px 16px 0 rgba(29,97,231,0.13);
 }
 .edit-btn {
   padding: 0.3rem 0.8rem;
