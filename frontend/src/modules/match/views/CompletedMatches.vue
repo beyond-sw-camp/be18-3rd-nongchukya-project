@@ -43,26 +43,22 @@ import PageNation from '../common/PageNation.vue';
       } else if(status === 'REFRESH_TOKEN_INVALID') {
         router.push({name: 'login'});
       } else if(status === 'INTERNAL_SERVER_ERROR') {
-        alert('에러가 발생했습니다.')
+        alert(message)
       }
     }
   });
 
   const cancelClick = async (matchId, roomId) => {
     try {
-      console.log(matchId);
-      console.log(roomId);
-      
-      
 
       if(confirm('정말로 취소하시겠습니까?')) {
       const result = await matchStore.cancelCompletedMatch(matchId, roomId);
-        
 
       if(result.code === 200) {
         alert('정상적으로 취소되었습니다.');
 
         await matchStore.fetchCompletedMatches(matchStore.pageInfo.currentPage, 10);
+        await matchStore.fetchMatches(matchStore.pageInfo.currentPage, 10);
       }
     }
     } catch (error) {

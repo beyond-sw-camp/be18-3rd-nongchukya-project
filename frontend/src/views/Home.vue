@@ -1,16 +1,16 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
-  <div class="home-page">
-    <DateSelector 
-      @date-selected="handleDateSelected"/>
-    <ImminentMatches
-      :imminentMatches="matchStore.imminentMatches"
-      @apply-click="handleApplyClick"/>
-    <DailyMatches
-      :dailyMatches="matchStore.dailyMatches"
-      @apply-click="handleApplyClick" 
-      @change-page="changePage"/>
-  </div>
+    <div class="home-page">
+      <DateSelector 
+        @date-selected="handleDateSelected"/>
+      <ImminentMatches
+        :imminentMatches="matchStore.imminentMatches"
+        @apply-click="handleApplyClick"/>
+      <DailyMatches
+        :dailyMatches="matchStore.dailyMatches"
+        @apply-click="handleApplyClick" 
+        @change-page="changePage"/>
+    </div>
 </template>
 
 <script setup>
@@ -79,7 +79,7 @@ import { useRoute, useRouter } from 'vue-router';
         } else if (status === 'REFRESH_TOKEN_INVALID') {
             router.push({ name: 'login' });
         } else {
-            alert('오류가 발생했습니다. 다시 시도해 주세요.');
+            alert('오류발생: ' + message);
         }
     }
   };
@@ -107,9 +107,9 @@ import { useRoute, useRouter } from 'vue-router';
 </script>
 
 <style scoped>
+
 .home-page {
-  min-height: 100vh;
-  background: linear-gradient(to bottom, #FFA652, #EEA562, #F6EADF);
-  font-family: 'Inter', sans-serif;
+  margin-left: 4em;
+  margin-right: 4em;
 }
 </style>

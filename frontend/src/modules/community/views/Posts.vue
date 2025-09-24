@@ -556,9 +556,4 @@ select option {
   color: #888;
 }
 
-.common-back {
-  min-height: 100vh;
-  background: linear-gradient(to bottom, #FFA652, #EEA562, #F6EADF);
-  font-family: 'Inter', sans-serif;
-}
 </style>

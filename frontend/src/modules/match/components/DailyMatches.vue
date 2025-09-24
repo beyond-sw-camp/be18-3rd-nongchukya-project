@@ -1,19 +1,13 @@
 <template>
   <div>
-    <div class="filters">
-      <select class="filter-select">
-        <option>지역</option>
-        <option>서울 전체</option>
-        <option>강남</option>
-        <option>홍대</option>
+    <!-- <div class="filters">
+      <select class="filter-select" v-model="gender">
+        <option :selected>성별</option>
+        <option value="A">전체</option>
+        <option value="F">여자만</option>
+        <option value="M">남자만</option>
       </select>
-      <select class="filter-select">
-        <option>성별</option>
-        <option>상관없음</option>
-        <option>남자만</option>
-        <option>여자만</option>
-      </select>
-    </div>
+    </div> -->
 
     <main class="match-list">
       <div class="match-item" v-for="match in dailyMatches" :key="match.id">

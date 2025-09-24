@@ -55,6 +55,8 @@ import { ref, onMounted } from 'vue';
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
+  margin-left: 3em;
+  margin-right: 3em;
 }
 .arrow {
   background: none;

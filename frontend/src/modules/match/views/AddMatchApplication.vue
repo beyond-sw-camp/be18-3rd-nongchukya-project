@@ -57,13 +57,15 @@ import { useSportStore } from '../stores/sportStore';
                 alert('에러가 발생했습니다.');
             } else if(status === 'SPORT_NOT_FOUND') {
                 alert(message);
-            } else if(status === 'INVALID_MATCH_DATE') {
+            } else if(status === 'CANNOT_APPLY_MATCH') {
                 alert(message);
             } else if(status === 'INVALID_MATCH_TIME') {
                 alert(message);
             } else if(status === 'DUPLICATE_MATCH_APPLICATION') {
                 alert(message);
-            }
+            } else if(status === 'INVALID_GENDER_OPTION') {
+                alert(message);
+            } 
     };
   }
 

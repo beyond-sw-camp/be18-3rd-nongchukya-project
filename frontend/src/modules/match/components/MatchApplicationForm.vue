@@ -1,5 +1,6 @@
 <template>
   <form @submit.prevent="submitClick">
+    <p>당일 신청은 2시간 이후부터 가능합니다!</p>
     <div class="mb-3">
       <label for="sport" class="form-label">종목</label>
       <select class="form-select" v-model="formData.sport">
