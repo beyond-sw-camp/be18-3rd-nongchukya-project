@@ -4,50 +4,46 @@
 
     <div class="settings-cards">
       <!-- 계정 관리 카드 -->
-      <div class="settings-card">
+      <div class="settings-card account-card">
         <h3 class="card-title">계정 관리</h3>
         <p class="card-desc">계정과 관련된 설정을 관리하세요</p>
-        <div class="card-actions">
+        <div class="card-actions-row">
           <button class="action-btn primary" @click="showPasswordChange = true">
-            🔒 비밀번호 변경
+            <span class="icon-lock"></span> 비밀번호 변경
           </button>
           <button class="action-btn warning" @click="showDeleteConfirm = true">
-            🗑️ 계정 삭제
+            <span class="icon-trash"></span> 계정 삭제
           </button>
         </div>
       </div>
 
       <!-- 알림 설정 카드 -->
-      <div class="settings-card">
+      <div class="settings-card notif-card">
         <h3 class="card-title">알림 설정</h3>
-        <p class="card-desc">앱 알림 및 이메일 알림을 설정하세요</p>
-        <div class="card-actions">
-          <button class="action-btn primary">🔔 알림 설정</button>
+        <p class="card-desc">앱 알림을 설정하세요</p>
+        <div class="notif-switch-row">
+          <span>앱 알림</span>
+          <label class="switch">
+            <input type="checkbox" v-model="appNotif" />
+            <span class="slider"></span>
+          </label>
         </div>
       </div>
+    <div class="appinfo-bar full">
+  <div class="appinfo-bar-section">
+    <span class="appinfo-label">버전</span>
+    <span class="appinfo-value">1.0.0</span>
+  </div>
+  <div class="appinfo-bar-section">
+    <span class="appinfo-label">최종 업데이트</span>
+    <span class="appinfo-value">2025년 9월 23일</span>
+  </div>
+  <div class="appinfo-bar-section appinfo-links">
+    <a href="#" class="info-link">이용약관</a>
+    <a href="#" class="info-link">개인정보처리방침</a>
+  </div>
+</div>
 
-      <!-- 앱 정보 카드 -->
-      <div class="settings-card">
-        <h3 class="card-title">앱 정보</h3>
-        <p class="card-desc">앱 버전 및 지원 정보를 확인하세요</p>
-        <div class="app-info">
-          <div class="info-row">
-            <span class="info-label">버전</span>
-            <span class="info-value">1.0.0</span>
-          </div>
-          <div class="info-row">
-            <span class="info-label">최종 업데이트</span>
-            <span class="info-value">2025년 9월 23일</span>
-          </div>
-          <div class="info-actions">
-            <a href="#" class="info-link">이용약관</a>
-            <a href="#" class="info-link">개인정보처리방침</a>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 계정 삭제 모달 -->
     <div v-if="showDeleteConfirm" class="modal-overlay" @click="showDeleteConfirm = false">
       <div class="modal-content" @click.stop>
         <div class="modal-header">
@@ -83,6 +79,7 @@
         </div>
       </div>
     </div>
+    </div>
   </div>
 </template>
 
@@ -90,27 +87,10 @@
 import { ref } from 'vue'
 import axios from 'axios'
 
+const appNotif = ref(true)
 const showPasswordChange = ref(false)
 const showDeleteConfirm = ref(false)
 const deletePassword = ref('')
-
-const downloadData = () => {
-  const data = {
-    profile: '사용자 프로필 데이터',
-    matches: '매치 기록 데이터',
-    stats: '통계 데이터'
-  }
-
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = 'my-sports-data.json'
-  document.body.appendChild(a)
-  a.click()
-  document.body.removeChild(a)
-  URL.revokeObjectURL(url)
-}
 
 const userId = localStorage.getItem('userId') // 로그인한 사용자 ID 필요
 
@@ -160,20 +140,25 @@ const deleteAccount = async () => {
   display: flex;
   flex-wrap: wrap;
   gap: 1.5rem;
+  justify-content: center;
 }
 
 .settings-card {
   background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-  padding: 1.5rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  padding: 2rem;
   flex: 1 1 300px;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .card-title {
   font-size: 1.2rem;
   font-weight: 600;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.3rem;
 }
 
 .card-desc {
@@ -182,74 +167,116 @@ const deleteAccount = async () => {
   color: #64748b;
 }
 
-.card-actions {
+.card-actions-row {
   display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+  gap: 1rem;
+  margin-top: 1.2rem;
 }
 
 .action-btn {
-  padding: 0.6rem 1rem;
+  padding: 0.6rem 1.3rem;
   border: none;
-  border-radius: 6px;
+  border-radius: 10px;
   cursor: pointer;
-  font-size: 0.95rem;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 600;
+  background: #f3f4f6;
+  color: #222;
+}
+.action-btn.primary { background: #1d61e7; color: #fff; }
+.action-btn.primary:hover { background: #174bb3; }
+.action-btn.warning { background: #ef4444; color: #fff; }
+.action-btn.warning:hover { background: #b91c1c; }
+
+.icon-lock::before { content: '🔒'; }
+.icon-trash::before { content: '🗑️'; }
+
+.notif-switch-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 1.1rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #222;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #e5e7eb;
+  border-radius: 24px;
+  transition: .3s;
+}
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  border-radius: 50%;
+  transition: .3s;
+}
+.switch input:checked + .slider { background-color: #1d61e7; }
+.switch input:checked + .slider:before { transform: translateX(20px); }
+
+/* 앱 정보 */
+.appinfo-bar {
+  width: 100%;
+  margin-top: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 2rem;
+  background: #f9fafb;
+  border-radius: 14px;
+  padding: 1rem 1.5rem;
+  font-size: 1rem;
+}
+.appinfo-bar-section {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
+.appinfo-label { color: #64748b; font-weight: 600; }
+.appinfo-value { color: #222; font-weight: 500; }
+.appinfo-links { gap: 1rem; }
+.info-link { color: #1d61e7; text-decoration: none; }
 
-.action-btn.primary { background: #3b82f6; color: white; }
-.action-btn.warning { background: #ef4444; color: white; }
-
-/* 앱 정보 카드 */
-.app-info .info-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 0.4rem 0;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.app-info .info-actions {
-  margin-top: 1rem;
-  display: flex;
-  gap: 1rem;
-}
-
-.info-link {
-  color: #3b82f6;
-  text-decoration: none;
-  font-size: 0.9rem;
-}
-
-/* 모달 스타일 */
+/* 모달 */
 .modal-overlay {
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
   background: rgba(0,0,0,0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex; align-items: center; justify-content: center;
   z-index: 1000;
   padding: 1rem;
 }
-
 .modal-content {
   background: white;
   border-radius: 12px;
   max-width: 500px;
   width: 100%;
-  max-height: 80vh;
-  overflow-y: auto;
   padding: 1.5rem;
 }
-
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
-
 .close-btn {
   background: none;
   border: none;
@@ -257,14 +284,12 @@ const deleteAccount = async () => {
   cursor: pointer;
   color: #64748b;
 }
-
 .form-actions {
   display: flex;
   gap: 1rem;
   justify-content: flex-end;
   margin-top: 1.5rem;
 }
-
 .btn-cancel {
   padding: 0.5rem 1.2rem;
   border: 1px solid #e2e8f0;
@@ -273,7 +298,6 @@ const deleteAccount = async () => {
   border-radius: 6px;
   cursor: pointer;
 }
-
 .btn-delete {
   padding: 0.5rem 1.2rem;
   border: none;
@@ -282,4 +306,16 @@ const deleteAccount = async () => {
   border-radius: 6px;
   cursor: pointer;
 }
+
+.appinfo-bar.full {
+  margin-top: 2rem;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  background: #f9fafb;
+  border-radius: 14px;
+  padding: 1rem 2rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+
 </style>

@@ -5,7 +5,7 @@
       <!-- 왼쪽: 로고 -->
       <div class="nav-left">
         <router-link to="/" class="logo-link">
-          <img src="@/assets/logo.png" alt="메인 로고" class="logo" />
+          <img src="@/assets/logoTransparent.png" alt="메인 로고" class="logo" />
         </router-link>
       </div>
 
