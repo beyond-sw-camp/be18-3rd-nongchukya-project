@@ -45,7 +45,7 @@
           v-if="isCancellable(m.matchDate)"
           type="button"
           class="btn-cancel"
-          @click="$emit('cancel-click', m.id)"
+          @click="$emit('cancel-click', m.id, m.roomId)"
         >
           <i class="mdi mdi-close"></i> 취소
         </button>
@@ -60,7 +60,7 @@
 const props = defineProps({
   completedMatches: { type: Array, required: true }
 })
-defineEmits(['cancel-click'])
+const emit = defineEmits(['cancel-click'])
 
 const getGenderText = (g) => {
   if (g === 'A') return '상관없음'

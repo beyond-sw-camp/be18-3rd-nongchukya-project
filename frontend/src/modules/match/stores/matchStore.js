@@ -62,6 +62,19 @@ export const useMatchStore = defineStore('match', () => {
     }
   };
 
+    const cancelCompletedMatch = async (matchId, roomId) => {
+        
+
+        const response = await api.delete(`/api/v1/chatrooms/group/${roomId}/leave`);
+        
+
+        
+        console.log(response.data);
+        
+        
+        return response.data
+    };
+
   return { matches, completedMatches, imminentMatches, dailyMatches, matchResults, pageInfo, 
-    fetchMatches, fetchCompletedMatches, fetchImminentMatches, fetchDailyMatches, fetchMatchResults };
+    fetchMatches, fetchCompletedMatches, fetchImminentMatches, fetchDailyMatches, fetchMatchResults, cancelCompletedMatch };
 });
