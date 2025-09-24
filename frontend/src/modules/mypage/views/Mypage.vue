@@ -25,15 +25,16 @@
       </div>
 
       <!-- 사용자 배지 -->
-      <div class="user-badge" v-if="userData">
-        <div class="avatar">
-          <img :src="userData.profileImage || defaultProfile" :alt="userData.name" />
-        </div>
-        <div class="user-info">
-          <span class="welcome-text">{{ userData.name }}님</span>
-          <span class="nickname-text">{{ profile?.nickname }}님</span>
-        </div>
+    <div class="user-badge" v-if="userData">
+      <div class="avatar">
+        <img :src="resolveProfileImage(userData.profileImage)" :alt="userData.name" />
       </div>
+      <div class="user-info">
+        <span class="welcome-text">{{ userData.name }}님</span>
+        <span class="nickname-text">{{ profile?.nickname }}님</span>
+      </div>
+    </div>
+
 
       <!-- 프로필 섹션 -->
       <ProfileSection
@@ -80,6 +81,15 @@ const tabs = [
   { id: 'settings', label: '설정' }
 ]
 
+// ✅ 프로필 이미지 변환 함수
+function resolveProfileImage(path) {
+  if (!path) return defaultProfile
+  if (path.startsWith('http')) {
+    return path // 카카오 CDN 같은 경우
+  }
+  return `http://localhost:8080${path}` // 서버 업로드 이미지
+}
+
 onMounted(async () => {
   try {
     const token = localStorage.getItem('accessToken')
@@ -96,7 +106,7 @@ onMounted(async () => {
       userData.value = {
         ...profileData,
         phone: profileData.phoneNumber || '미등록',
-        profileImage: profileData.profileImage || defaultProfile,
+        profileImage: profileData.profileImage, // 경로 원본 그대로 저장
         favoriteSports: profileData.favoriteSports || []
       }
     }

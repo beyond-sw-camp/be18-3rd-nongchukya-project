@@ -1,5 +1,19 @@
 <template>
   <form class="signup-form" @submit.prevent="onSubmit">
+   
+    <div class="profile-img-edit">
+      <div class="profile-img-wrapper">
+        <img
+          :src="profileImageUrl || defaultProfile"
+          class="profile-img-preview"
+          alt="프로필 이미지"
+        />
+        <label class="profile-plus-btn">
+          <input type="file" accept="image/*" @change="handleProfileImage" hidden />
+          <span>+</span>
+        </label>
+      </div>
+    </div>
 
     <!-- 이메일 인증 -->
     <div class="input-group">
@@ -105,31 +119,25 @@
     <!-- 생년월일 -->
     <div class="input-group">
       <label for="signup-birthdate">생년월일</label>
-      <input
-        id="signup-birthdate"
-        type="date"
-        v-model="birthdate"
-        required
-      />
+      <input id="signup-birthdate" type="date" v-model="birthdate" required />
     </div>
 
     <!-- 성별 -->
     <div class="input-group">
       <label>성별</label>
-    <div class="radio-group">
-      <label class="radio-option">
-      <input type="radio" value="M" v-model="gender" />
-        <span class="custom-radio"></span>
-        <span class="gender-icon">♂</span> 남자
-      </label>
-      <label class="radio-option">
-      <input type="radio" value="F" v-model="gender" />
-        <span class="custom-radio"></span>
-        <span class="gender-icon">♀</span> 여자
-      </label>
+      <div class="radio-group">
+        <label class="radio-option">
+          <input type="radio" value="M" v-model="gender" />
+          <span class="custom-radio"></span>
+          <span class="gender-icon">♂</span> 남자
+        </label>
+        <label class="radio-option">
+          <input type="radio" value="F" v-model="gender" />
+          <span class="custom-radio"></span>
+          <span class="gender-icon">♀</span> 여자
+        </label>
+      </div>
     </div>
-    </div>
-
 
     <!-- 주소 -->
     <div class="input-group">
@@ -167,8 +175,23 @@
 import { ref, watch, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '@/api/axios'
+import defaultProfile from '@/assets/user-icon.png'
 
 const router = useRouter()
+
+// 프로필 이미지 관련
+const profileImageUrl = ref('')
+const selectedFile = ref(null)
+function handleProfileImage(e) {
+  const file = e.target.files[0]
+  if (!file) return
+  selectedFile.value = file
+  const reader = new FileReader()
+  reader.onload = (ev) => {
+    profileImageUrl.value = ev.target.result
+  }
+  reader.readAsDataURL(file)
+}
 
 // 입력 값 상태
 const email = ref('')
@@ -178,7 +201,7 @@ const password = ref('')
 const passwordConfirm = ref('')
 const name = ref('')
 const birthdate = ref('')
-const gender = ref('M') 
+const gender = ref('M')
 const address = ref('')
 const phone = ref('')
 
@@ -199,10 +222,12 @@ watch(username, (val) => {
   }
   debounceTimer = setTimeout(async () => {
     try {
-      const res = await api.get(`/api/v1/auth/check-id`, { params: { loginId: val } })
+      const res = await api.get(`/api/v1/auth/check-id`, {
+        params: { loginId: val },
+      })
       isUsernameAvailable.value = res.data.available
     } catch (err) {
-      console.error("아이디 체크 실패:", err)
+      console.error('아이디 체크 실패:', err)
     }
   }, 500)
 })
@@ -219,22 +244,22 @@ const sendVerificationCode = async () => {
     return
   }
   try {
-    await api.post("/api/v1/auth/send-email-code", { email: email.value })
+    await api.post('/api/v1/auth/send-email-code', { email: email.value })
     verificationSent.value = true
     verificationSuccess.value = false
     verificationError.value = false
     alert(`인증번호가 ${email.value}로 전송되었습니다.`)
   } catch (err) {
-    alert("이메일 인증 요청 실패: " + (err.response?.data?.message || err.message))
+    alert('이메일 인증 요청 실패: ' + (err.response?.data?.message || err.message))
   }
 }
 
 // 이메일 인증 확인
 const checkVerificationCode = async () => {
   try {
-    const res = await api.post("/api/v1/auth/verify-email-code", {
+    const res = await api.post('/api/v1/auth/verify-email-code', {
       email: email.value,
-      code: verificationCode.value
+      code: verificationCode.value,
     })
     if (res.data.success) {
       verificationSuccess.value = true
@@ -246,7 +271,7 @@ const checkVerificationCode = async () => {
       alert('인증번호가 올바르지 않습니다.')
     }
   } catch (err) {
-    alert("이메일 인증 확인 실패: " + (err.response?.data?.message || err.message))
+    alert('이메일 인증 확인 실패: ' + (err.response?.data?.message || err.message))
   }
 }
 
@@ -266,30 +291,89 @@ const onSubmit = async () => {
   }
 
   try {
-    const res = await api.post("/api/v1/auth/signup", {
+    const formData = new FormData()
+
+    // ✅ DTO를 JSON Blob으로 변환
+    const dto = {
       loginId: username.value,
       email: email.value,
       password: password.value,
       nickname: nickname.value,
       name: name.value,
-      birthdate: birthdate.value, // ✅ 나이 대신 생년월일만 보냄
+      birthdate: birthdate.value,
       gender: gender.value,
       address: address.value,
       phoneNumber: phone.value,
       dmOption: true,
       status: "ACTIVE"
-    })
-    console.log("회원가입 성공:", res.data)
-    alert("회원가입이 완료되었습니다. 로그인 페이지로 이동합니다.")
+    }
+    formData.append("dto", new Blob([JSON.stringify(dto)], { type: "application/json" }))
+
+    // ✅ 파일 추가
+    if (selectedFile.value) {
+      formData.append("profileImage", selectedFile.value)
+    }
+
+    const res = await api.post('/api/v1/auth/signup', formData)
+
+    console.log('회원가입 성공:', res.data)
+    alert('회원가입이 완료되었습니다. 로그인 페이지로 이동합니다.')
     router.push('/login')
   } catch (err) {
-    console.error("회원가입 실패:", err.response?.data || err.message)
-    alert("회원가입 실패: " + (err.response?.data?.message || err.message))
+    console.error('회원가입 실패:', err.response?.data || err.message)
+    alert('회원가입 실패: ' + (err.response?.data?.message || err.message))
   }
 }
 </script>
 
 <style scoped>
+/* 프로필 사진 업로드 */
+.profile-img-edit {
+  margin-top: 3.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+.profile-img-wrapper {
+  position: relative;
+  width: 100px;
+  height: 100px;
+}
+.profile-img-preview {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e5e7eb;
+  background: #f3f4f6;
+}
+.profile-plus-btn {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 32px;
+  height: 32px;
+  background: #bfbfbf;
+  color: #ffffff;
+  border-radius: 50%;
+  border: 2px solid #5b5b5b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 8px 0 rgba(29,97,231,0.13);
+  transition: background 0.18s;
+  z-index: 2;
+}
+.profile-plus-btn:hover {
+  background: #7b7b7b;
+}
+.profile-plus-btn input {
+  display: none;
+}
 .username-available {
   color: #1abc1a;
   font-size: 0.92rem;
