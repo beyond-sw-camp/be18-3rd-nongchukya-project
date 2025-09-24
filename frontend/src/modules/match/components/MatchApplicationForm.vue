@@ -1,6 +1,8 @@
 <template>
   <form @submit.prevent="submitClick">
     <p>당일 신청은 2시간 이후부터 가능합니다!</p>
+
+    <!-- 종목 -->
     <div class="mb-3">
       <label for="sport" class="form-label">종목</label>
       <select class="form-select" v-model="formData.sport">
@@ -11,16 +13,36 @@
       </select>
     </div>
 
-    <div class="mb-3">
+    <!-- 지역 (자동완성) -->
+    <div class="mb-3" style="position:relative;">
       <label for="region" class="form-label">지역</label>
-      <input type="text" class="form-control" id="region" v-model="formData.region">
+      <input
+        type="text"
+        class="form-control"
+        id="region"
+        v-model="query"
+        @input="searchRegion"
+        placeholder="예: 서초구"
+        autocomplete="off"
+      />
+      <ul v-if="suggestions.length" class="suggest-list">
+        <li
+          v-for="(item, index) in suggestions"
+          :key="index"
+          @click="selectRegion(item)"
+        >
+          {{ item }}
+        </li>
+      </ul>
     </div>
 
+    <!-- 날짜 -->
     <div class="mb-3">
       <label for="date" class="form-label">날짜</label>
-      <input type="date" class="form-control" id="date" v-model="formData.matchDate">
+      <input type="date" class="form-control" id="date" v-model="formData.matchDate" />
     </div>
 
+    <!-- 시작 시간 -->
     <div class="mb-3">
       <label for="startTime" class="form-label">시작 시간</label>
       <select class="form-select time-select" id="startTime" v-model="formData.startTime">
@@ -31,6 +53,7 @@
       </select>
     </div>
 
+    <!-- 종료 시간 -->
     <div class="mb-3">
       <label for="endTime" class="form-label">종료 시간</label>
       <select class="form-select time-select" id="endTime" v-model="formData.endTime">
@@ -41,6 +64,7 @@
       </select>
     </div>
 
+    <!-- 성별 -->
     <div class="mb-3">
       <label for="genderOption" class="form-label">성별</label>
       <select class="form-select" v-model="formData.genderOption">
@@ -50,6 +74,7 @@
       </select>
     </div>
 
+    <!-- 버튼 -->
     <div class="btn-wrapper">
       <button type="submit" class="btn btn-primary m-2">신청</button>
     </div>
@@ -57,31 +82,77 @@
 </template>
 
 <script setup>
-import { reactive, toRaw } from 'vue';
+import { reactive, toRaw, ref } from "vue";
 
 const props = defineProps({
   initFormData: Object,
-  formType: {
-    type: String,
-    required: true
-  },
-  sports: {
-    type: Array,
-    required: true
-  }
+  formType: { type: String, required: true },
+  sports: { type: Array, required: true },
 });
 
 const formData = reactive({ ...props.initFormData });
+const emit = defineEmits(["form-submit"]);
 
-const emit = defineEmits(['form-submit']);
+const USE_MOCK = true; 
+const query = ref("");
+const suggestions = ref([]);
 
+const mockGuList = ["동작구", "서초구", "종로구", "관악구", "강남구", "마포구", "용산구", "성동구", "광진구", "중구"];
+
+const searchRegion = async () => {
+  if (!query.value) {
+    suggestions.value = [];
+    return;
+  }
+
+  if (USE_MOCK) {
+    suggestions.value = mockGuList.filter((gu) =>
+      gu.startsWith(query.value)
+    );
+  } else {
+    // const res = await axios.get("https://nominatim.openstreetmap.org/search", {
+    //   params: {
+    //     q: query.value,
+    //     format: "json",
+    //     addressdetails: 1,
+    //     countrycodes: "kr",
+    //     extratags: 1,
+    //     limit: 5,
+    //   },
+    // });
+    // suggestions.value = res.data
+    //   .filter((item) =>
+    //     item.class === "boundary" &&
+    //     item.type === "administrative" &&
+    //     item.extratags?.admin_level === "6"
+    //   )
+    //   .map((item) => {
+    //     const addr = item.address;
+    //     return `${addr.state || ""} ${addr.county || addr.city || ""}`.trim();
+    //   });
+  }
+};
+
+const selectRegion = (item) => {
+  formData.region = item;
+  query.value = item;
+  suggestions.value = [];
+};
+
+// ----------------------------
+// 제출
+// ----------------------------
 const submitClick = () => {
-  emit('form-submit', toRaw(formData))
+  if (!formData.region) {
+    alert("지역을 선택해주세요!");
+    return;
+  }
+  emit("form-submit", toRaw(formData));
 };
 </script>
+
 <style scoped>
 form {
-    
   background: #fff;
   padding: 24px;
   border-radius: 16px;
@@ -103,12 +174,13 @@ form {
   padding: 10px 14px;
   transition: all 0.25s ease;
   background: #fafafa;
+}
 
-  &:focus {
-    border-color: #4a90e2;
-    box-shadow: 0 0 8px rgba(74,144,226,0.4);
-    background: #fff;
-  }
+.form-control:focus,
+.form-select:focus {
+  border-color: #4a90e2;
+  box-shadow: 0 0 8px rgba(74,144,226,0.4);
+  background: #fff;
 }
 
 .mb-3 {
@@ -120,11 +192,11 @@ form {
   border-radius: 10px;
   background: #fafafa;
   transition: all 0.25s ease;
+}
 
-  &:hover {
-    border-color: #4a90e2;
-    background: #f0f7ff;
-  }
+.time-select:hover {
+  border-color: #4a90e2;
+  background: #f0f7ff;
 }
 
 .btn-wrapper {
@@ -140,16 +212,16 @@ form {
   font-weight: 600;
   letter-spacing: 0.5px;
   transition: all 0.3s ease;
+}
 
-  &:hover {
-    background: linear-gradient(135deg, #5aa3f2, #4a90e2);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 14px rgba(74,144,226,0.4);
-  }
+.btn-primary:hover {
+  background: linear-gradient(135deg, #5aa3f2, #4a90e2);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(74,144,226,0.4);
+}
 
-  &:active {
-    transform: scale(0.97);
-  }
+.btn-primary:active {
+  transform: scale(0.97);
 }
 
 @keyframes fadeIn {
@@ -157,4 +229,24 @@ form {
   to { opacity: 1; transform: translateY(0); }
 }
 
+.suggest-list {
+  list-style: none;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 0;
+  margin-top: 4px;
+  background: #fff;
+  max-height: 150px;
+  overflow-y: auto;
+  z-index: 100;
+  position: absolute;
+  width: 100%;
+}
+.suggest-list li {
+  padding: 8px 12px;
+  cursor: pointer;
+}
+.suggest-list li:hover {
+  background: #f0f7ff;
+}
 </style>

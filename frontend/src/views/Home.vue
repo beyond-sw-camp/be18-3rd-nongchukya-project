@@ -143,7 +143,7 @@ import { useRoute, useRouter } from 'vue-router';
 /* 텍스트 */
 .no-matches p {
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 500;
   color: #555;
 }
 </style>
