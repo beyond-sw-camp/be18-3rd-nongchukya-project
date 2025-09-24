@@ -63,6 +63,8 @@ import { useSportStore } from '../stores/sportStore';
                 alert(message);
             } else if(status === 'DUPLICATE_MATCH_APPLICATION') {
                 alert(message);
+            } else if(status === 'INVALID_GENDER_OPTION') {
+                alert(message);
             }
     };
   }
