@@ -12,9 +12,8 @@
     <div v-if="editProfileMode" class="edit-form">
       <div class="edit-form-inner">
         <div class="profile-img-edit">
-          <!-- ✅ 프로필 이미지 표시 부분 수정 -->
           <img
-            :src="resolveProfileImage(editableData.profileImage)"
+            :src="displayProfileImage()"
             class="profile-img-preview"
             alt="프로필 이미지"
           />
@@ -22,7 +21,13 @@
             프로필 사진 변경
             <input type="file" accept="image/*" @change="handleProfileImage" hidden />
           </label>
+
+          <button class="reset-btn" @click="resetProfileImage">
+            기본 이미지로 변경
+          </button>
         </div>
+
+        <!-- 텍스트 필드 -->
         <div class="edit-fields">
           <label>이름
             <input v-model="editableData.name" placeholder="이름을 입력하세요." />
@@ -46,7 +51,6 @@
 
     <!-- 기본 정보 모드 -->
     <div class="basic-info" v-else>
-      <!-- ✅ 기본 모드에서도 프로필 사진 표시 -->
       <div class="profile-img-view">
         <img
           :src="resolveProfileImage(editableData.profileImage)"
@@ -61,7 +65,7 @@
       <p><strong>주소:</strong> {{ editableData.address || '미등록' }}</p>
       <p><strong>나이:</strong> {{ editableData.age || '-' }}</p>
 
-      <!-- 관심 있는 운동만 표시 -->
+      <!-- 관심 있는 운동 -->
       <div class="profile-header">
         <h3>선호 운동</h3>
         <button class="edit-btn" @click="editLevelMode = !editLevelMode">
@@ -80,23 +84,24 @@
     </div>
 
     <!-- 레벨 수정 모드 -->
-    <div v-if="editLevelMode" class="edit-form">
-      <div v-for="sport in defaultSports" :key="sport" class="sport-edit">
-        <label>{{ sport }}</label>
-        <select v-model="editableLevels[sport].levelId">
-          <option disabled value="">레벨 선택</option>
-          <option v-for="level in levelOptions" :key="level.id" :value="level.id">
-            {{ level.name }}
-          </option>
-        </select>
-
-        <label class="checkbox-container">
-          관심 있음
-          <input type="checkbox" v-model="editableLevels[sport].interest" />
-          <span class="checkmark"></span>
-        </label>
+    <div v-if="editLevelMode" class="edit-level-card">
+      <div class="edit-level-list">
+        <div v-for="sport in defaultSports" :key="sport" class="edit-level-item">
+          <div class="edit-level-sport">{{ sport }}</div>
+          <select v-model="editableLevels[sport].levelId" class="edit-level-select">
+            <option disabled value="">레벨 선택</option>
+            <option v-for="level in levelOptions" :key="level.id" :value="level.id">
+              {{ level.name }}
+            </option>
+          </select>
+          <label class="edit-level-checkbox">
+            <input type="checkbox" v-model="editableLevels[sport].interest" />
+            <span class="edit-level-checkbox-custom"></span>
+            관심 있음
+          </label>
+        </div>
       </div>
-      <button @click="saveLevels">저장</button>
+      <button class="save-btn" @click="saveLevels">저장</button>
     </div>
   </div>
 </template>
@@ -104,6 +109,7 @@
 <script setup>
 import { ref, reactive, watch, computed } from 'vue'
 import axios from 'axios'
+import defaultProfile from '@/assets/default_profile.png'
 
 const props = defineProps({
   userData: Object,
@@ -119,6 +125,60 @@ const defaultSports = ['농구', '축구', '야구']
 const editProfileMode = ref(false)
 const editableData = reactive({ ...props.userData })
 
+// 프로필 이미지 선택/미리보기
+const selectedFile = ref(null)
+const previewImage = ref(null)
+
+function handleProfileImage(e) {
+  const file = e.target.files[0]
+  if (!file) return
+  selectedFile.value = file
+
+  const reader = new FileReader()
+  reader.onload = (ev) => {
+    previewImage.value = ev.target.result
+  }
+  reader.readAsDataURL(file)
+}
+
+async function resetProfileImage() {
+  const token = localStorage.getItem("accessToken")
+  try {
+    const res = await axios.put(
+      "http://localhost:8080/api/v1/mypage/profile/image/reset",
+      {},
+      { headers: { Authorization: `Bearer ${token}` } }
+    )
+
+    previewImage.value = null
+    selectedFile.value = null
+    editableData.profileImage = res.data.profileImage  // 보통 null
+
+    emit('update', { ...editableData })
+    alert("프로필 이미지가 기본 이미지로 변경되었습니다.")
+  } catch (err) {
+    console.error(err.response?.data || err.message)
+    alert("프로필 이미지 초기화 실패")
+  }
+}
+
+// 최종 표시할 이미지 (미리보기 > DB > 기본값)
+function displayProfileImage() {
+  if (previewImage.value) return previewImage.value
+  return resolveProfileImage(editableData.profileImage)
+}
+
+// 프로필 이미지 경로 처리
+function resolveProfileImage(path) {
+  if (!path || path.trim() === '') {
+    return defaultProfile
+  }
+  if (path.startsWith('http') || path.startsWith('data:image')) {
+    return path
+  }
+  return `http://localhost:8080${path}`
+}
+
 // 레벨 편집 모드
 const editLevelMode = ref(false)
 const editableLevels = reactive({})
@@ -131,18 +191,7 @@ const levelOptions = [
   { id: 3, name: 'Advanced' }
 ]
 
-// ✅ 프로필 이미지 경로 처리 함수
-function resolveProfileImage(path) {
-  if (!path) {
-    return 'https://via.placeholder.com/100x100?text=Profile'
-  }
-  if (path.startsWith('http')) {
-    return path
-  }
-  return `http://localhost:8080${path}`
-}
-
-// 초기 데이터 세팅
+// 초기 레벨 세팅
 const initLevels = (userLevels) => {
   for (const sport of defaultSports) {
     const interest = userLevels?.[sport]?.interest ?? false
@@ -170,36 +219,57 @@ const interestedSports = computed(() => {
   return defaultSports.filter(sport => localUserLevels[sport]?.interest)
 })
 
-// 프로필 저장 (API 호출)
 const saveProfile = async () => {
   try {
     const token = localStorage.getItem('accessToken')
-    const res = await axios.put('http://localhost:8080/api/v1/mypage/profile', {
-      name: editableData.name,
-      email: editableData.email,
-      phoneNumber: editableData.phone,
-      address: editableData.address,
-      age: editableData.age
-    }, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
 
-    editableData.name = res.data.name
-    editableData.email = res.data.email
-    editableData.phone = res.data.phoneNumber
-    editableData.address = res.data.address
-    editableData.age = res.data.age
+    // 1) 일반 정보 업데이트
+    const res = await axios.put(
+      'http://localhost:8080/api/v1/mypage/profile',
+      {
+        name: editableData.name,
+        email: editableData.email,
+        phoneNumber: editableData.phone,
+        address: editableData.address,
+        age: editableData.age
+      },
+      {
+        headers: { Authorization: `Bearer ${token}` }
+      }
+    )
 
-    emit('update', { ...res.data })
-    editProfileMode.value = false
+    // 2) 파일이 선택된 경우 업로드
+    if (selectedFile.value) {
+      const formData = new FormData()
+      formData.append("profileImage", selectedFile.value)
+
+      const imageRes = await axios.put(
+        "http://localhost:8080/api/v1/mypage/profile/image",
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data"
+          }
+        }
+      )
+
+      // 서버에서 내려준 이미지 경로 반영
+      editableData.profileImage = imageRes.data.profileImage
+    }
+
+    // 3) UI 업데이트
+    Object.assign(editableData, res.data)
     alert('프로필이 업데이트되었습니다.')
+    window.location.reload()
   } catch (err) {
-    console.error(err)
+    console.error(err.response?.data || err.message)
     alert('프로필 업데이트 실패')
   }
 }
 
-// 레벨 저장 (API 호출)
+
+// 레벨 저장
 const saveLevels = async () => {
   const token = localStorage.getItem('accessToken')
 
@@ -215,7 +285,6 @@ const saveLevels = async () => {
         headers: { Authorization: `Bearer ${token}` }
       })
 
-      // UI 즉시 반영
       localUserLevels[sport] = {
         levelId: editableLevels[sport].levelId,
         levelName: levelOptions.find(l => l.id === editableLevels[sport].levelId)?.name || 'Unknown',
@@ -230,8 +299,99 @@ const saveLevels = async () => {
 }
 </script>
 
-
 <style scoped>
+/* 레벨 수정 카드 스타일 */
+.edit-level-card {
+  background: #f9fafb;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px 0 rgba(0,0,0,0.06);
+  padding: 2rem 1.5rem 1.5rem 1.5rem;
+  margin: 2rem auto 1.5rem auto;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.edit-level-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  margin-bottom: 1.2rem;
+}
+.edit-level-item {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 1px 4px 0 rgba(0,0,0,0.04);
+  padding: 1rem 1.2rem;
+}
+.edit-level-sport {
+  min-width: 54px;
+  font-weight: 600;
+  color: #1d61e7;
+  font-size: 1.05rem;
+}
+.edit-level-select {
+  flex: 1;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background: #fafbfc;
+  font-size: 1rem;
+  transition: border 0.2s, box-shadow 0.2s;
+  outline: none;
+}
+.edit-level-select:focus {
+  border: 1.5px solid #1D61E7;
+  background: #fff;
+  box-shadow: 0 0 0 2px #e3edff;
+}
+.edit-level-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.97rem;
+  color: #222;
+  font-weight: 500;
+  cursor: pointer;
+  position: relative;
+}
+.edit-level-checkbox input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+.edit-level-checkbox-custom {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 1.5px solid #d1d5db;
+  background: #f3f4f6;
+  display: inline-block;
+  margin-right: 2px;
+  transition: background 0.18s, border 0.18s;
+  position: relative;
+}
+.edit-level-checkbox input:checked + .edit-level-checkbox-custom {
+  background: #1d61e7;
+  border-color: #1d61e7;
+}
+.edit-level-checkbox input:checked + .edit-level-checkbox-custom:after {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 2px;
+  width: 5px;
+  height: 10px;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  display: block;
+}
 .profile-section {
   margin-top: 2.5rem;
   max-width: 480px;
@@ -271,9 +431,9 @@ const saveLevels = async () => {
 }
 .profile-img-edit {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;   /* 👉 버튼들을 가로로 배치 */
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.5rem;           /* 버튼 사이 간격 */
 }
 .profile-img-preview {
   width: 100px;
@@ -283,20 +443,22 @@ const saveLevels = async () => {
   border: 2px solid #e5e7eb;
   background: #f3f4f6;
 }
-.profile-upload-btn {
+.profile-upload-btn,
+.reset-btn {
   display: inline-block;
   margin-top: 0.3rem;
-  padding: 0.4rem 1.1rem;
+  padding: 0.3rem 0.8rem; 
   background: #f3f4f6;
   color: #1d61e7;
   border-radius: 8px;
-  font-size: 0.97rem;
+  font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
   border: 1px solid #e5e7eb;
   transition: background 0.18s, color 0.18s;
 }
-.profile-upload-btn:hover {
+.profile-upload-btn:hover,
+.reset-btn:hover {
   background: #e3edff;
   color: #174bb3;
 }

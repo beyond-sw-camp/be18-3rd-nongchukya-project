@@ -1,7 +1,20 @@
 <template>
   <form @submit.prevent="onSubmit">
     <input type="text" placeholder="아이디" v-model="loginId" />
-    <input type="password" placeholder="비밀번호" v-model="password" />
+
+    <div class="password-container">
+      <input
+        :type="showPassword ? 'text' : 'password'"
+        placeholder="비밀번호"
+        v-model="password"
+      />
+      <img
+        src="@/assets/show_password.png"
+        alt="비밀번호 보기"
+        class="toggle-password"
+        @click="togglePassword"
+      />
+    </div>
 
     <div class="forgot-password-container">
       <router-link to="/forgot-password" class="forgot-password">
@@ -36,16 +49,18 @@
 import { ref } from "vue"
 import { useRouter } from "vue-router"
 import api from '@/api/axios'
-import { jwtDecode } from 'jwt-decode';
-import { useNotificationStore } from "@/stores/notifications";
+import { useNotificationStore } from "@/stores/notifications"
 
 const router = useRouter()
 
-// 입력값 바인딩
 const loginId = ref("")
 const password = ref("")
+const showPassword = ref(false)   
 
-// 로그인 API
+const togglePassword = () => {
+  showPassword.value = !showPassword.value
+}
+
 const onSubmit = async () => {
   try {
     const res = await api.post("/api/v1/auth/login", {
@@ -53,33 +68,77 @@ const onSubmit = async () => {
       password: password.value
     })
 
-    console.log("✅ 로그인 성공:", res.data)
-    const nickname = jwtDecode(res.data.accessToken).nick
+    console.log("로그인 성공:", res.data)
 
-    // ⭕ accessToken만 저장
     localStorage.setItem("accessToken", res.data.accessToken)
-    localStorage.setItem("nickname", nickname);
+    localStorage.setItem("refreshToken", res.data.refreshToken)
+    localStorage.setItem("nickname", res.data.nickname)
+
     await useNotificationStore().refreshConnectionAfterTokenChange()
 
     alert("로그인 성공!")
     router.push("/") 
   } catch (err) {
-    console.error("❌ 로그인 실패:", err.response?.data || err.message)
+    console.error("로그인 실패:", err.response?.data || err.message)
     alert("로그인 실패: " + (err.response?.data?.message || err.message))
   }
 }
 
 const redirectToKakao = () => {
-  const clientId = "ce2fb7ac1fb573cfb323ede04caab4d5"; // 발급받은 REST API 키
-  const redirectUri = "http://localhost:5173/oauth/callback"; // 백엔드 콜백 URI
-  const kakaoUrl = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}`;
+  const clientId = "ce2fb7ac1fb573cfb323ede04caab4d5"
+  const redirectUri = "http://localhost:5173/oauth/callback" 
+  const kakaoUrl = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}`
 
-  window.location.href = kakaoUrl;
-};
+  window.location.href = kakaoUrl
+}
 </script>
 
-
 <style scoped>
+form {
+  display: flex;
+  flex-direction: column;
+  width: 80%;
+  max-width: 300px;
+}
+
+input {
+  margin-bottom: 1rem;
+  padding: 0.7rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.password-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.password-container input {
+  flex: 1;
+  padding-right: 40px; 
+}
+.toggle-password {
+  position: absolute;
+  right: 13px;
+  top: 25px;                   
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+button[type="submit"] {
+  padding: 0.7rem;
+  background-color: #FFA047;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+button[type="submit"]:hover {
+  background-color: #ff8614;
+}
+
 .forgot-password-container {
   display: flex;
   justify-content: flex-end;
@@ -96,12 +155,6 @@ const redirectToKakao = () => {
   color: #FFA047;
   text-decoration: underline;
 }
-
-.signup-text a:hover {
-  color: #FFA047;
-  text-decoration: underline;
-}
-
 
 .or-divider {
   display: flex;
@@ -120,38 +173,6 @@ const redirectToKakao = () => {
   color: #888;
   font-size: 0.95rem;
   white-space: nowrap;
-}
-form {
-  display: flex;
-  flex-direction: column;
-  width: 80%;
-  max-width: 300px;
-}
-
-.or-text {
-  text-align: center;
-  color: #888;
-  margin: 1.2rem 0 0.5rem 0;
-  font-size: 0.95rem;
-}
-
-input {
-  margin-bottom: 1rem;
-  padding: 0.7rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-}
-
-button[type="submit"] {
-  padding: 0.7rem;
-  background-color: #FFA047;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
-button[type="submit"]:hover {
-  background-color: #ff8614;
 }
 
 .social-login {
@@ -191,10 +212,8 @@ button[type="submit"]:hover {
   stroke-width: 1;          
   fill: none;
   rx: 8; ry: 8;             
-
   stroke-dasharray: 680;    
   stroke-dashoffset: 680;   
-
   transition: stroke-dashoffset 0.7s ease, stroke-width 0.3s ease;
 }
 
@@ -210,5 +229,9 @@ button[type="submit"]:hover {
 .signup-text a {
   color: #ff6600;
   font-weight: 600;
+}
+.signup-text a:hover {
+  color: #FFA047;
+  text-decoration: underline;
 }
 </style>
