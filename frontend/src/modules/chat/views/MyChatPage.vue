@@ -67,7 +67,7 @@
           <div class="drawer-title">{{selectedRoomName}}</div>
           <button class="icon-btn" @click="closeDrawer">×</button>
         </header>
-        <ChatRoom v-if="selectedRoomId" :key="selectedRoomId" :room-id="selectedRoomId" />
+        <ChatRoom v-if="selectedRoomId" :key="selectedRoomId" :room-id="selectedRoomId" :initial-unread="selectedUnread" />
       </aside>
     </div>
   </div>
@@ -88,6 +88,7 @@ export default {
       drawerOpen: false,
       selectedRoomId: null,
       selectedRoomName: "",
+      selectedUnread: 0,
     };
   },
   async created() {
@@ -116,6 +117,7 @@ export default {
       const chat = [...this.friendRooms, ...this.groupRooms].find(c => c.roomId === roomId);
       this.selectedRoomId = roomId;
       this.selectedRoomName = chat ? chat.roomName : "채팅";
+      this.selectedUnread = chat?.unReadCount || 0;
       this.drawerOpen = true;
       document.body.style.overflow = "hidden"; // 스크롤 잠금
       if (chat) {

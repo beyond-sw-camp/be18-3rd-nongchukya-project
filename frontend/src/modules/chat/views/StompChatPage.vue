@@ -59,7 +59,10 @@ const API = 'http://localhost:8080'
 export default {
   name: 'ChatRoom',
   components: { VotePanel },
-  props: { roomId: { type: [String, Number], default: null } },
+  props: { roomId: { type: [String, Number], default: null },
+           initialUnread: { type: Number, default: 0 }
+          },
+
   data() {
     return {
       messages: [],
@@ -71,6 +74,7 @@ export default {
       roomDeleted: false,   
       cleaned: false,       
       members: [],
+      _didInitialScroll: false,
     }
   },
   computed: {
@@ -88,6 +92,8 @@ export default {
     await this.loadMembers().catch(() => {})
     if(this.members.length === 0) this.buildMembersFromMessages();
 
+    this.$nextTick(() => this.scrollToInitial())
+
     this.connectWebsocket()
   },
   beforeRouteLeave(to, from, next) {
@@ -99,6 +105,29 @@ export default {
   methods: {
     isMe(m) {
       return m.senderNickname === this.senderNickname
+    },
+    scrollToInitial() {
+      if (this._didInitialScroll) return;
+      const box = this.$el.querySelector('.chat-box');
+      if (!box) return;
+ 
+      const unread = Math.max(0, this.initialUnread || 0);
+      if (unread > 0 && this.messages.length >= unread) {
+        const targetIndex = this.messages.length - unread; // 첫 unread의 index
+        const nodes = box.querySelectorAll('.msg');
+        const target = nodes[targetIndex];
+        if (target) {
+          target.scrollIntoView({ block: 'start' });
+          this._didInitialScroll = true;
+          return;
+        }
+      }
+      // unread가 없거나 타겟을 못 찾으면 기본: 맨 아래
+      box.scrollTop = box.scrollHeight;
+      this._didInitialScroll = true;
+    },
+    isNearBottom(box, threshold = 40) {
+      return box.scrollHeight - (box.scrollTop + box.clientHeight) <= threshold;
     },
     connectWebsocket() {
       if (this.stompClient?.connected) return
@@ -131,8 +160,17 @@ export default {
                 this.members.push(body.senderNickname);
               }
               this.$nextTick(() => {
-                const box = this.$el.querySelector('.chat-box')
-                if (box) box.scrollTop = box.scrollHeight
+                const box = this.$el.querySelector('.chat-box');
+                if (!box) return;
+                // 초기 스크롤이 아직이면 초기 규칙 우선
+                if (!this._didInitialScroll) {
+                  this.scrollToInitial();
+                  return;
+                }
+                // 이후에는: 내가 보낸 메시지거나, 사용자가 거의 바닥이라면 자동 스틱
+                if (this.isMe(body) || this.isNearBottom(box)) {
+                  box.scrollTop = box.scrollHeight;
+                }
               })
             },
             { Authorization: `Bearer ${this.token}` }
