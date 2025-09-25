@@ -2,7 +2,7 @@
   <li class="comment-item">
     <div class="comment-main">
       <span v-if="isReply" class="arrow">↪</span>
-      <img class="avatar" :src="comment.userProfileImage || defaultAvatar" />
+      <img class="avatar" :src="resolveProfileImage(comment.userProfileImage)" />
       <div class="comment-content-wrapper">
         <div class="comment-header">
           <div class="name-badge">
@@ -62,6 +62,7 @@
 import { ref } from "vue";
 import axios from "axios";
 import CommentNode from "./CommentNode.vue";
+import defaultProfile from '@/assets/default_profile.png'
 
 const props = defineProps({
   comment: Object,
@@ -80,8 +81,6 @@ const postingReply = ref(false);
 const editingComment = ref(false);
 const deletingComment = ref(false);
 
-const defaultAvatar = "https://via.placeholder.com/40";
-
 const formatDate = (dateStr) => {
   if (!dateStr) return "";
   const date = new Date(dateStr);
@@ -92,6 +91,17 @@ const formatDate = (dateStr) => {
   const min = String(date.getMinutes()).padStart(2, "0");
   return `${y}-${m}-${d} ${h}:${min}`;
 };
+
+    // ✅ 프로필 이미지 경로 처리 함수
+function resolveProfileImage(path) {
+    if (!path) {
+        return defaultProfile
+    }
+    if (path.startsWith('http')) {
+            return path
+    }
+    return `http://localhost:8080${path}`
+}
 
 // 답글 토글
 const toggleReplyInput = () => (showReplyInput.value = !showReplyInput.value);
