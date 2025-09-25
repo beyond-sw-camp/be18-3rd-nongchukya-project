@@ -29,21 +29,72 @@
           </label>
         </div>
       </div>
+    </div>
+
+    <!-- 앱 정보 -->
     <div class="appinfo-bar full">
-  <div class="appinfo-bar-section">
-    <span class="appinfo-label">버전</span>
-    <span class="appinfo-value">1.0.0</span>
-  </div>
-  <div class="appinfo-bar-section">
-    <span class="appinfo-label">최종 업데이트</span>
-    <span class="appinfo-value">2025년 9월 23일</span>
-  </div>
-  <div class="appinfo-bar-section appinfo-links">
-    <a href="#" class="info-link">이용약관</a>
-    <a href="#" class="info-link">개인정보처리방침</a>
+      <div class="appinfo-bar-section">
+        <span class="appinfo-label">버전</span>
+        <span class="appinfo-value">1.0.0</span>
+      </div>
+      <div class="appinfo-bar-section">
+        <span class="appinfo-label">최종 업데이트</span>
+        <span class="appinfo-value">2025년 9월 23일</span>
+      </div>
+      <div class="appinfo-bar-section appinfo-links">
+        <a href="#" class="info-link">이용약관</a>
+        <a href="#" class="info-link">개인정보처리방침</a>
+      </div>
+    </div>
+
+    <!-- 비밀번호 변경 모달 -->
+<div v-if="showPasswordChange" class="modal-overlay" @click="showPasswordChange = false">
+  <div class="modal-content" @click.stop>
+    <div class="modal-header">
+      <h3>🔒 비밀번호 변경</h3>
+      <button class="close-btn" @click="showPasswordChange = false">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label for="currentPassword">현재 비밀번호</label>
+        <input
+          id="currentPassword"
+          type="password"
+          v-model="currentPassword"
+          class="form-input"
+          placeholder="현재 비밀번호 입력"
+        />
+      </div>
+      <div class="form-group">
+        <label for="newPassword">새 비밀번호</label>
+        <input
+          id="newPassword"
+          type="password"
+          v-model="newPassword"
+          class="form-input"
+          placeholder="8자 이상, 영문+숫자 포함"
+        />
+      </div>
+      <div class="form-group">
+        <label for="confirmPassword">새 비밀번호 확인</label>
+        <input
+          id="confirmPassword"
+          type="password"
+          v-model="confirmPassword"
+          class="form-input"
+          placeholder="새 비밀번호 다시 입력"
+        />
+      </div>
+      <div class="form-actions">
+        <button class="btn-cancel" @click="showPasswordChange = false">취소</button>
+        <button class="btn-primary" @click="changePassword">변경하기</button>
+      </div>
+    </div>
   </div>
 </div>
 
+
+    <!-- ✅ 계정 삭제 모달 -->
     <div v-if="showDeleteConfirm" class="modal-overlay" @click="showDeleteConfirm = false">
       <div class="modal-content" @click.stop>
         <div class="modal-header">
@@ -79,7 +130,6 @@
         </div>
       </div>
     </div>
-    </div>
   </div>
 </template>
 
@@ -90,9 +140,51 @@ import axios from 'axios'
 const appNotif = ref(true)
 const showPasswordChange = ref(false)
 const showDeleteConfirm = ref(false)
+
+const currentPassword = ref('')
+const newPassword = ref('')
+const confirmPassword = ref('')
 const deletePassword = ref('')
 
 const userId = localStorage.getItem('userId') // 로그인한 사용자 ID 필요
+
+// ✅ 비밀번호 변경
+const changePassword = async () => {
+  if (!currentPassword.value || !newPassword.value || !confirmPassword.value) {
+    alert("모든 비밀번호를 입력해주세요.")
+    return
+  }
+  if (newPassword.value !== confirmPassword.value) {
+    alert("새 비밀번호가 일치하지 않습니다.")
+    return
+  }
+
+  try {
+    const token = localStorage.getItem('accessToken')
+    const res = await axios.put(
+      "http://localhost:8080/api/v1/auth/change-password",
+      {
+        currentPassword: currentPassword.value,
+        newPassword: newPassword.value
+      },
+      { headers: { Authorization: `Bearer ${token}` } }
+    )
+
+    alert(res.data.message || "비밀번호가 변경되었습니다.")
+    showPasswordChange.value = false
+    currentPassword.value = ''
+    newPassword.value = ''
+    confirmPassword.value = ''
+
+    // 새 토큰 저장 (백엔드가 반환한다면)
+    if (res.data.data?.accessToken) {
+      localStorage.setItem("accessToken", res.data.data.accessToken)
+      localStorage.setItem("refreshToken", res.data.data.refreshToken)
+    }
+  } catch (err: any) {
+    alert(err.response?.data?.message || "비밀번호 변경 실패")
+  }
+}
 
 const deleteAccount = async () => {
   if (!deletePassword.value) {
@@ -103,7 +195,7 @@ const deleteAccount = async () => {
   try {
     const token = localStorage.getItem('accessToken')
     await axios.put(
-      `http://localhost:8080/api/v1/delete-user/${userId}`,
+      `http://localhost:8080/api/v1/auth/delete-user`,
       { password: deletePassword.value },
       { headers: { Authorization: `Bearer ${token}` } }
     )
@@ -128,21 +220,18 @@ const deleteAccount = async () => {
   margin: 0 auto;
   font-family: 'Noto Sans KR', sans-serif;
 }
-
 .section-title {
   font-size: 1.8rem;
   font-weight: 700;
   margin-bottom: 1.5rem;
   color: #1e293b;
 }
-
 .settings-cards {
   display: flex;
   flex-wrap: wrap;
   gap: 1.5rem;
   justify-content: center;
 }
-
 .settings-card {
   background: #fff;
   border-radius: 16px;
@@ -154,25 +243,21 @@ const deleteAccount = async () => {
   flex-direction: column;
   align-items: flex-start;
 }
-
 .card-title {
   font-size: 1.2rem;
   font-weight: 600;
   margin-bottom: 0.3rem;
 }
-
 .card-desc {
   font-size: 0.9rem;
   margin-bottom: 1rem;
   color: #64748b;
 }
-
 .card-actions-row {
   display: flex;
   gap: 1rem;
   margin-top: 1.2rem;
 }
-
 .action-btn {
   padding: 0.6rem 1.3rem;
   border: none;
@@ -190,10 +275,8 @@ const deleteAccount = async () => {
 .action-btn.primary:hover { background: #174bb3; }
 .action-btn.warning { background: #ef4444; color: #fff; }
 .action-btn.warning:hover { background: #b91c1c; }
-
 .icon-lock::before { content: '🔒'; }
 .icon-trash::before { content: '🗑️'; }
-
 .notif-switch-row {
   display: flex;
   align-items: center;
@@ -204,7 +287,6 @@ const deleteAccount = async () => {
   font-weight: 500;
   color: #222;
 }
-
 .switch {
   position: relative;
   display: inline-block;
@@ -233,8 +315,6 @@ const deleteAccount = async () => {
 }
 .switch input:checked + .slider { background-color: #1d61e7; }
 .switch input:checked + .slider:before { transform: translateX(20px); }
-
-/* 앱 정보 */
 .appinfo-bar {
   width: 100%;
   margin-top: 1.5rem;
@@ -256,8 +336,6 @@ const deleteAccount = async () => {
 .appinfo-value { color: #222; font-weight: 500; }
 .appinfo-links { gap: 1rem; }
 .info-link { color: #1d61e7; text-decoration: none; }
-
-/* 모달 */
 .modal-overlay {
   position: fixed; top: 0; left: 0; right: 0; bottom: 0;
   background: rgba(0,0,0,0.5);
@@ -306,7 +384,6 @@ const deleteAccount = async () => {
   border-radius: 6px;
   cursor: pointer;
 }
-
 .appinfo-bar.full {
   margin-top: 2rem;
   width: 100%;
@@ -316,6 +393,47 @@ const deleteAccount = async () => {
   border-radius: 14px;
   padding: 1rem 2rem;
   box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.3rem;
+}
+
+.form-input {
+  padding: 0.7rem 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-input:focus {
+  border-color: #1d61e7;
+  box-shadow: 0 0 0 2px rgba(29, 97, 231, 0.15);
+  outline: none;
+}
+
+.btn-primary {
+  padding: 0.6rem 1.3rem;
+  border: none;
+  border-radius: 8px;
+  background: #1d61e7;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-primary:hover {
+  background: #174bb3;
 }
 
 </style>
