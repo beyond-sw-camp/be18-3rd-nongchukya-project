@@ -83,10 +83,15 @@
       <input
         id="signup-password"
         type="password"
-        placeholder="비밀번호를 입력하세요."
+        placeholder="비밀번호를 입력하세요(영문, 숫자 조합 8자 이상)."
         v-model="password"
+        @input="validatePassword"
+        pattern="[A-Za-z0-9@$!%*?&]*"
         required
       />
+      <div v-if="passwordError" class="error-message">
+        {{ passwordError }}
+      </div>
     </div>
 
     <!-- 비밀번호 확인 -->
@@ -205,6 +210,22 @@ const gender = ref('M')
 const address = ref('')
 const phone = ref('')
 
+// 비밀번호 검증 관련 (여기에 추가!)
+const passwordError = ref('')
+
+const validatePassword = () => {
+  const korean = /[ㄱ-ㅎㅏ-ㅣ가-힣]/
+  const validPattern = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/
+  
+  if (korean.test(password.value)) {
+    passwordError.value = '비밀번호는 영문으로 입력해주세요 (한/영 키 확인)'
+  } else if (!validPattern.test(password.value) && password.value.length > 0) {
+    passwordError.value = '영문, 숫자 조합으로 8자 이상 입력해주세요'
+  } else {
+    passwordError.value = ''
+  }
+}
+
 // 이메일 인증 관련
 const verificationCode = ref('')
 const verificationSent = ref(false)
@@ -293,7 +314,6 @@ const onSubmit = async () => {
   try {
     const formData = new FormData()
 
-    // ✅ DTO를 JSON Blob으로 변환
     const dto = {
       loginId: username.value,
       email: email.value,
@@ -309,7 +329,6 @@ const onSubmit = async () => {
     }
     formData.append("dto", new Blob([JSON.stringify(dto)], { type: "application/json" }))
 
-    // ✅ 파일 추가
     if (selectedFile.value) {
       formData.append("profileImage", selectedFile.value)
     }
@@ -327,7 +346,6 @@ const onSubmit = async () => {
 </script>
 
 <style scoped>
-/* 프로필 사진 업로드 */
 .profile-img-edit {
   margin-top: 3.5rem;
   display: flex;
