@@ -7,7 +7,7 @@
       <div class="post-author-info">
         <div class="author-left">
           <img
-            :src="post?.userProfileImage ? `http://localhost:8080${post.userProfileImage}` : '/images/default-profile.png'"
+            :src="resolveProfileImage(post.userProfileImage)"
             alt="프로필"
             class="profile-img"
           />
@@ -98,6 +98,7 @@
 <script>
 import { ref, onMounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import defaultProfile from '@/assets/default_profile.png'
 import axios from "axios";
 import CommentNode from "../components/CommentNode.vue";
 
@@ -121,6 +122,16 @@ export default {
     const formatDate = (dateStr) => {
       const date = new Date(dateStr);
       return isNaN(date) ? "" : date.toLocaleString();
+    };
+
+    function resolveProfileImage(path) {
+        if (!path) {
+            return defaultProfile
+        }
+        if (path.startsWith('http')) {
+            return path
+        }
+        return `http://localhost:8080${path}`
     };
 
     // 게시글 불러오기
@@ -236,6 +247,7 @@ export default {
       neighbors,
       route,
       formatDate,
+      resolveProfileImage,
       fetchPost,
       addComment,
       toggleLike,
