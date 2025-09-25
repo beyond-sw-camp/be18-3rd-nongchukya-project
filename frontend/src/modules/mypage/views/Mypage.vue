@@ -75,8 +75,8 @@ const activeTab = ref('profile')
 
 const tabs = [
   { id: 'profile', label: '프로필' },
-  { id: 'matches', label: '매치기록' },
-  { id: 'matching', label: '매칭 중 경기' },
+  { id: 'matches', label: '경기 결과' },
+  { id: 'matching', label: '매칭 대기' },
   { id: 'report', label: '신고' },
   { id: 'settings', label: '설정' }
 ]

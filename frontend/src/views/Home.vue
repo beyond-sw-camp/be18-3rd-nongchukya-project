@@ -90,7 +90,7 @@ import { useRoute, useRouter } from 'vue-router';
         } else if (status === 'REFRESH_TOKEN_INVALID') {
             router.push({ name: 'login' });
         } else {
-            alert('오류발생: ' + message);
+            alert('로그인이 필요합니다!');
         }
     }
   };

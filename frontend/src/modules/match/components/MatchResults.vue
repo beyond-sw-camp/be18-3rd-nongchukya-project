@@ -1,6 +1,5 @@
 <template>
   <div class="cards">
-    <h3 class="section-title">경기 결과 이력 조회</h3>
     <div v-for="m in matchResults" :key="m.id" class="card">
       <div class="head">
         <div class="title-group">

@@ -2,12 +2,13 @@
   <section class="imminent-matches">
     <h2 class="section-title">🔥 곧 마감! 빨리 신청하세요.</h2>
     <div class="cards-wrapper">
-      <div class="card" v-for="match in imminentMatches" :key="match.id" @click="$emit('apply-click', match)">
+      <div class="card" v-for="match in imminentMatches" :key="match.id">
         <span class="tag">마감임박</span>
         <div class="card-content">
           <div class="time">{{ match.matchDate }} {{ getStartTime(match.matchTime) }}</div>
           <div class="details">{{ match.sport }} {{ match.region }}</div>
         </div>
+        <button class="apply-button" @click="$emit('apply-click', match)">참여하기</button>
       </div>
     </div>
   </section>
@@ -82,5 +83,16 @@
 .card-content .details {
   font-size: 12px;
   color: #666;
+}
+.apply-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: bold;
+  margin-top: 12px;
 }
 </style>
