@@ -91,4 +91,10 @@
 
 ---
 
+# 6. 테스트 명세서
+
+[테스트 명세서](https://docs.google.com/spreadsheets/d/1293Cmz0EkIeH163VswqcNQPK-0b8Cr8gXvtHyckqLN8/edit?gid=840718577#gid=840718577)
+
+---
+
 
